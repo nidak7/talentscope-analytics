@@ -4,24 +4,19 @@ import { HiringTrendChart } from "../components/charts/hiring-trend-chart";
 import { RemoteRatioChart } from "../components/charts/remote-ratio-chart";
 import { SalaryDistributionChart } from "../components/charts/salary-distribution-chart";
 import { SkillsBarChart } from "../components/charts/skills-bar-chart";
-import { LiveJobsList } from "../components/live-jobs-list";
 import { LoadingPanel } from "../components/ui/loading-panel";
 import { MetricCard } from "../components/ui/metric-card";
-import { fetchDashboard, fetchLiveJobs, triggerBootstrapSync, triggerSync } from "../lib/api-client";
+import { fetchDashboard, triggerBootstrapSync, triggerSync } from "../lib/api-client";
 import { compactNumber } from "../lib/formatters";
 import { useAuth } from "../state/auth-context";
-import type { DashboardStats, LiveJob } from "../types/api";
+import type { DashboardStats } from "../types/api";
 
 export function DashboardPage() {
   const { user } = useAuth();
   const [data, setData] = useState<DashboardStats | null>(null);
-  const [jobs, setJobs] = useState<LiveJob[]>([]);
   const [loading, setLoading] = useState(true);
-  const [jobsLoading, setJobsLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [jobsError, setJobsError] = useState<string | null>(null);
-  const [filter, setFilter] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async () => {
@@ -29,26 +24,13 @@ export function DashboardPage() {
       const response = await fetchDashboard();
       setData(response);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Unable to load dashboard");
-    }
-  }, []);
-
-  const loadJobs = useCallback(async (titleFilter?: string) => {
-    setJobsLoading(true);
-    setJobsError(null);
-    try {
-      const response = await fetchLiveJobs(24, titleFilter || undefined);
-      setJobs(response);
-    } catch (err: any) {
-      setJobsError(err?.response?.data?.detail || "Failed to load live jobs");
-    } finally {
-      setJobsLoading(false);
+      setError(err?.response?.data?.detail || "Unable to load market analysis");
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([loadDashboard(), loadJobs()])
+    loadDashboard()
       .catch(() => undefined)
       .finally(() => {
         if (mounted) {
@@ -58,14 +40,7 @@ export function DashboardPage() {
     return () => {
       mounted = false;
     };
-  }, [loadDashboard, loadJobs]);
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      loadJobs(filter).catch(() => undefined);
-    }, 280);
-    return () => clearTimeout(id);
-  }, [filter, loadJobs]);
+  }, [loadDashboard]);
 
   const remoteShare = useMemo(() => {
     if (!data || data.total_jobs === 0) {
@@ -77,7 +52,7 @@ export function DashboardPage() {
   async function refreshAll() {
     setNotice(null);
     setLoading(true);
-    await Promise.all([loadDashboard(), loadJobs(filter)]);
+    await loadDashboard();
     setLoading(false);
   }
 
@@ -86,10 +61,10 @@ export function DashboardPage() {
     setNotice(null);
     try {
       const result = user?.role === "admin" ? await triggerSync() : await triggerBootstrapSync();
-      setNotice(`Sync finished with status '${result.status}'. Jobs processed: ${result.jobs_processed}.`);
-      await Promise.all([loadDashboard(), loadJobs(filter)]);
+      setNotice(`Data sync completed. Records processed: ${result.jobs_processed}.`);
+      await loadDashboard();
     } catch (err: any) {
-      setNotice(err?.response?.data?.detail || "Sync failed. Check API connectivity and credentials.");
+      setNotice(err?.response?.data?.detail || "Sync failed. Check API connectivity.");
     } finally {
       setSyncing(false);
     }
@@ -110,73 +85,91 @@ export function DashboardPage() {
   if (error || !data) {
     return (
       <div className="panel p-6">
-        <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-300">Dashboard unavailable</h3>
+        <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-300">Analysis unavailable</h3>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{error || "Unknown error"}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <section className="panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6">
+      {/* Header Section */}
+      <section className="panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Market Overview</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Interactive view of current demand, salaries, and remote trends.
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Market Intelligence Dashboard</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Real-time analysis of job market trends, skills demand, and hiring patterns.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="subtle-btn inline-flex items-center gap-1.5" onClick={refreshAll}>
-            <RefreshCw className="h-3.5 w-3.5" />
+          <button className="subtle-btn inline-flex items-center gap-2" onClick={refreshAll}>
+            <RefreshCw className="h-4 w-4" />
             Refresh
           </button>
-          <button className="cta-btn inline-flex items-center gap-1.5" onClick={runSyncNow} disabled={syncing}>
-            <Sparkles className="h-3.5 w-3.5" />
-            {syncing ? "Syncing..." : "Sync Live Data"}
+          <button className="cta-btn inline-flex items-center gap-2" onClick={runSyncNow} disabled={syncing}>
+            <Sparkles className="h-4 w-4" />
+            {syncing ? "Updating..." : "Update Data"}
           </button>
         </div>
       </section>
 
-      {notice ? (
+      {/* Notice Messages */}
+      {notice && (
         <section className="panel border-brand-200 bg-brand-50/70 p-4 text-sm text-brand-900 dark:border-brand-900 dark:bg-brand-900/20 dark:text-brand-100">
           {notice}
         </section>
-      ) : null}
+      )}
 
-      {data.total_jobs === 0 ? (
-        <section className="panel border-accent-200 bg-accent-50/70 p-5 text-sm text-accent-900 dark:border-accent-900 dark:bg-accent-900/20 dark:text-accent-100">
-          <p className="font-semibold">No job data yet.</p>
-          <p className="mt-1">
-            Run <span className="font-semibold">Sync Live Data</span> to ingest real listings. If sync fails, verify
-            `ADZUNA_APP_ID` and `ADZUNA_APP_KEY` in backend env.
-          </p>
-          <p className="mt-1 inline-flex items-center gap-1 text-xs">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Admin can run full sync; users can run bootstrap sync for initial data.
-          </p>
+      {data.total_jobs === 0 && (
+        <section className="panel border-amber-200 bg-amber-50/70 p-5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold">No market data available yet.</p>
+              <p className="mt-1">Click <span className="font-semibold">Update Data</span> to fetch the latest job market information. This will analyze real job listings to build insights.</p>
+              {user?.role !== "admin" && (
+                <p className="mt-2 text-xs opacity-75">Note: Admin users can perform full data refresh. Regular users trigger initial data bootstrap.</p>
+              )}
+            </div>
+          </div>
         </section>
-      ) : null}
+      )}
 
+      {/* Key Metrics */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Jobs analyzed" value={compactNumber(data.total_jobs)} />
-        <MetricCard label="Market Heat Score" value={`${data.market_heat_score}/100`} hint="Custom signal" />
-        <MetricCard label="Remote share" value={`${remoteShare}%`} />
-        <MetricCard label="Tracked skills" value={compactNumber(data.top_skills.length)} />
+        <MetricCard 
+          label="Job Listings Analyzed" 
+          value={compactNumber(data.total_jobs)} 
+          hint="Total records in database"
+        />
+        <MetricCard 
+          label="Market Heat Score" 
+          value={`${data.market_heat_score}/100`} 
+          hint="Demand intensity indicator"
+        />
+        <MetricCard 
+          label="Remote Work Ratio" 
+          value={`${remoteShare}%`} 
+          hint="Percentage of remote positions"
+        />
+        <MetricCard 
+          label="Skills Tracked" 
+          value={compactNumber(data.top_skills.length)} 
+          hint="Unique skills identified"
+        />
       </section>
 
+      {/* Charts Row 1 */}
       <section className="grid gap-4 xl:grid-cols-2">
         <SkillsBarChart data={data.top_skills} />
         <HiringTrendChart data={data.hiring_trend} />
       </section>
 
+      {/* Charts Row 2 */}
       <section className="grid gap-4 xl:grid-cols-2">
         <SalaryDistributionChart data={data.salary_distribution} />
         <RemoteRatioChart {...data.remote_ratio} />
       </section>
-
-      {jobsError ? <section className="panel p-4 text-sm text-rose-700 dark:text-rose-300">{jobsError}</section> : null}
-
-      <LiveJobsList jobs={jobs} loading={jobsLoading} titleFilter={filter} onFilterChange={setFilter} />
     </div>
   );
 }

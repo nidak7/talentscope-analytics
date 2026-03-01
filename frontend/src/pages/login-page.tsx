@@ -75,9 +75,9 @@ export function LoginPage() {
     <div className="app-bg flex min-h-screen items-center justify-center p-4">
       <div className="panel w-full max-w-md p-7">
         <p className="text-xs uppercase tracking-[0.25em] text-slate-500">TalentScope</p>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">Analytics Platform</h1>
+        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">Market Intelligence</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Real-time job market intelligence powered by live listings.
+          Analyze job market trends, skills demand, and hiring patterns.
         </p>
 
         {status?.first_user_will_be_admin ? (
@@ -147,4 +147,3 @@ export function LoginPage() {
     </div>
   );
 }
-

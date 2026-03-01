@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { HiringTrendChart } from "../components/charts/hiring-trend-chart";
+import { LoadingPanel } from "../components/ui/loading-panel";
 import { fetchRoleIntelligence } from "../lib/api-client";
 import { asCurrency, compactNumber } from "../lib/formatters";
 import type { RoleIntelligence } from "../types/api";
-import { HiringTrendChart } from "../components/charts/hiring-trend-chart";
-import { LoadingPanel } from "../components/ui/loading-panel";
 
 export function RoleSearchPage() {
   const [query, setQuery] = useState("data engineer");
@@ -128,7 +128,7 @@ export function RoleSearchPage() {
 
           {!result.total_jobs ? (
             <div className="panel p-4 text-sm text-slate-600 dark:text-slate-300">
-              No jobs found for this role yet. Run a sync from the Admin page and try again.
+              No market data found for this role yet. Run a data sync and try again.
             </div>
           ) : null}
         </div>

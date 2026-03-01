@@ -100,11 +100,11 @@ export function AdminPage() {
         <div>
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Data Sync Controls</h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Trigger a manual ingestion from Adzuna and refresh analytics.
+            Fetch latest job listings and update market analysis.
           </p>
         </div>
         <button className="cta-btn" onClick={handleSync} disabled={runningSync}>
-          {runningSync ? "Syncing..." : "Run Sync Now"}
+          {runningSync ? "Syncing..." : "Update Data"}
         </button>
       </div>
 
@@ -116,15 +116,15 @@ export function AdminPage() {
 
       {syncResult ? (
         <div className="panel p-5 text-sm text-slate-700 dark:text-slate-300">
-          Last manual sync: <span className="font-semibold">{syncResult.status}</span>,{" "}
-          {syncResult.jobs_processed} jobs processed.
+          Last update: <span className="font-semibold">{syncResult.status}</span>,{" "}
+          {syncResult.jobs_processed} records processed.
         </div>
       ) : null}
 
       {error ? <div className="panel p-5 text-sm text-rose-700 dark:text-rose-300">{error}</div> : null}
 
       <div className="panel p-5">
-        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Ingestion Logs</h4>
+        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Data Update History</h4>
         {loadingLogs ? (
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Loading logs...</p>
         ) : (
