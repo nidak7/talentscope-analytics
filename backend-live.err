@@ -1,6 +1,0 @@
-INFO:     Started server process [14076]
-INFO:     Waiting for application startup.
-2026-03-01 19:06:09,945 | WARNING | app.analytics_engine.skill_extractor | spaCy model 'en_core_web_sm' not found. Falling back to blank English pipeline.
-2026-03-01 19:06:10,313 | INFO | app.main | TalentScope Analytics API started
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
