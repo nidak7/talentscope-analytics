@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
-import { fetchIngestionLogs, triggerSync } from "../lib/api-client";
+import {
+  claimAdminRole,
+  fetchBootstrapStatus,
+  fetchIngestionLogs,
+  triggerSync
+} from "../lib/api-client";
 import { dateTime } from "../lib/formatters";
 import { useAuth } from "../state/auth-context";
 import type { IngestionLog, SyncResponse } from "../types/api";
 
 export function AdminPage() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [logs, setLogs] = useState<IngestionLog[]>([]);
   const [syncResult, setSyncResult] = useState<SyncResponse | null>(null);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [runningSync, setRunningSync] = useState(false);
+  const [claimingAdmin, setClaimingAdmin] = useState(false);
+  const [adminMissing, setAdminMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function loadLogs() {
@@ -28,6 +35,10 @@ export function AdminPage() {
   useEffect(() => {
     if (user?.role === "admin") {
       loadLogs();
+    } else {
+      fetchBootstrapStatus()
+        .then((response) => setAdminMissing(!response.has_admin))
+        .catch(() => setAdminMissing(false));
     }
   }, [user?.role]);
 
@@ -45,6 +56,20 @@ export function AdminPage() {
     }
   }
 
+  async function claimAdmin() {
+    setClaimingAdmin(true);
+    setError(null);
+    try {
+      await claimAdminRole();
+      await refreshProfile();
+      await loadLogs();
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || "Could not claim admin role");
+    } finally {
+      setClaimingAdmin(false);
+    }
+  }
+
   if (user?.role !== "admin") {
     return (
       <div className="panel p-5">
@@ -55,6 +80,12 @@ export function AdminPage() {
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Use the first account created in a fresh database, or create an admin via `/api/v1/auth/seed-admin`.
         </p>
+        {adminMissing ? (
+          <button onClick={claimAdmin} disabled={claimingAdmin} className="cta-btn mt-4">
+            {claimingAdmin ? "Claiming..." : "Claim Admin Role"}
+          </button>
+        ) : null}
+        {error ? <p className="mt-2 text-sm text-rose-600 dark:text-rose-300">{error}</p> : null}
       </div>
     );
   }
@@ -68,11 +99,7 @@ export function AdminPage() {
             Trigger a manual ingestion from Adzuna and refresh analytics.
           </p>
         </div>
-        <button
-          className="cta-btn"
-          onClick={handleSync}
-          disabled={runningSync}
-        >
+        <button className="cta-btn" onClick={handleSync} disabled={runningSync}>
           {runningSync ? "Syncing..." : "Run Sync Now"}
         </button>
       </div>
@@ -128,3 +155,4 @@ export function AdminPage() {
     </div>
   );
 }
+

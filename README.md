@@ -141,6 +141,7 @@ docker compose up --build
   - `POST /api/v1/auth/login`
   - `GET /api/v1/auth/me` (protected)
 - On a fresh database, the **first signup user automatically gets admin role**.
+- If users exist but no admin exists, a logged-in user can claim admin via `POST /api/v1/auth/claim-admin`.
 - To create first admin:
   - Set `ADMIN_BOOTSTRAP_KEY` in backend env
   - Call `POST /api/v1/auth/seed-admin` with `bootstrap_key`
@@ -161,6 +162,7 @@ ADZUNA_APP_KEY=...
 ## Core API Routes
 
 - `GET /api/v1/auth/bootstrap-status`
+- `POST /api/v1/auth/claim-admin`
 - `GET /api/v1/insights/dashboard`
 - `GET /api/v1/insights/live-jobs?limit=20&title=data+engineer`
 - `GET /api/v1/insights/role-intelligence?title=data+engineer`

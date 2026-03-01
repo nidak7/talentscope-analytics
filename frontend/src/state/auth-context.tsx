@@ -20,6 +20,7 @@ type AuthContextValue = {
   signup: (fullName: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -44,6 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     attachAccessToken(null);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    const response = await http.get<User>("/auth/me");
+    setUser(response.data);
+    localStorage.setItem(USER_KEY, JSON.stringify(response.data));
   }, []);
 
   const signup = useCallback(
@@ -88,9 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const response = await http.get<User>("/auth/me");
-        setUser(response.data);
-        localStorage.setItem(USER_KEY, JSON.stringify(response.data));
+        await refreshProfile();
       } catch {
         logout();
       } finally {
@@ -99,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     hydrateSession().catch(() => setLoading(false));
-  }, [logout]);
+  }, [logout, refreshProfile]);
 
   useEffect(() => {
     const interceptorId = http.interceptors.response.use(
@@ -117,8 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logout]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ token, user, loading, signup, login, logout }),
-    [token, user, loading, signup, login, logout]
+    () => ({ token, user, loading, signup, login, logout, refreshProfile }),
+    [token, user, loading, signup, login, logout, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

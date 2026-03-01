@@ -1,5 +1,6 @@
 import os
 
+from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth_core.deps import get_current_user
@@ -67,3 +68,23 @@ async def bootstrap_status(db=Depends(get_db)) -> dict[str, bool]:
         "has_admin": admin_count > 0,
         "first_user_will_be_admin": user_count == 0,
     }
+
+
+@router.post("/claim-admin", response_model=UserOut)
+async def claim_admin(current_user: UserOut = Depends(get_current_user), db=Depends(get_db)) -> UserOut:
+    admin_count = await db["users"].count_documents({"role": "admin"})
+    if admin_count > 0:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An admin account already exists")
+
+    await db["users"].update_one({"_id": ObjectId(current_user.id)}, {"$set": {"role": "admin"}})
+    updated_user = await db["users"].find_one({"_id": ObjectId(current_user.id)})
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return UserOut(
+        id=str(updated_user["_id"]),
+        full_name=updated_user["full_name"],
+        email=updated_user["email"],
+        role=updated_user["role"],
+        created_at=updated_user["created_at"],
+    )
