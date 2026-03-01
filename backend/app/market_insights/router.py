@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.auth_core.deps import get_current_user
@@ -10,6 +10,7 @@ from app.schemas.dashboard import DashboardStats
 from app.schemas.job_feed import LiveJobOut
 from app.schemas.role_intelligence import RoleIntelligenceResponse
 from app.schemas.skill_gap import SkillGapRequest, SkillGapResponse
+from app.schemas.sync import SyncResponse
 
 from .query_engine import MarketInsightsEngine
 
@@ -57,3 +58,13 @@ async def live_jobs(
     engine: MarketInsightsEngine = Depends(get_insights_engine),
 ) -> list[LiveJobOut]:
     return await engine.live_jobs(limit=limit, title=title)
+
+
+@router.post("/bootstrap-sync", response_model=SyncResponse)
+async def bootstrap_sync(
+    request: Request,
+    _: UserOut = Depends(get_current_user),
+) -> SyncResponse:
+    """Allow authenticated users to initialize data when dashboard is empty."""
+    sync_engine = request.app.state.sync_engine
+    return await sync_engine.run(triggered_by="dashboard-bootstrap")

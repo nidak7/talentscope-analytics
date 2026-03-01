@@ -64,7 +64,11 @@ export function AdminPage() {
       await refreshProfile();
       await loadLogs();
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Could not claim admin role");
+      if (err?.response?.status === 404) {
+        setError("Claim admin endpoint not found. Restart backend with latest code.");
+      } else {
+        setError(err?.response?.data?.detail || "Could not claim admin role");
+      }
     } finally {
       setClaimingAdmin(false);
     }
@@ -155,4 +159,3 @@ export function AdminPage() {
     </div>
   );
 }
-

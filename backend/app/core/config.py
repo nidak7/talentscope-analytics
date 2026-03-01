@@ -26,6 +26,7 @@ class Settings(BaseSettings):
         alias="SYNC_KEYWORDS",
     )
     sync_interval_minutes: int = Field(default=180, alias="SYNC_INTERVAL_MINUTES")
+    fallback_public_pages: int = Field(default=3, alias="FALLBACK_PUBLIC_PAGES")
 
     cache_ttl_seconds: int = Field(default=300, alias="CACHE_TTL_SECONDS")
     spacy_model: str = Field(default="en_core_web_sm", alias="SPACY_MODEL")
