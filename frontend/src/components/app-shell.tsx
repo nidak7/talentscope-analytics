@@ -15,10 +15,10 @@ import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../state/auth-context";
 
 const navItems = [
-  { label: "Dashboard", to: "/dashboard", icon: BarChart3 },
-  { label: "Role Search", to: "/roles", icon: Search },
-  { label: "Skill Gap", to: "/skill-gap", icon: Brain },
-  { label: "Admin", to: "/admin", icon: DatabaseZap }
+  { label: "Market Overview", to: "/dashboard", icon: BarChart3 },
+  { label: "Role Intelligence", to: "/roles", icon: Search },
+  { label: "Skill Gap Analysis", to: "/skill-gap", icon: Brain },
+  { label: "Data Sync", to: "/admin", icon: DatabaseZap }
 ];
 
 export function AppShell() {
@@ -54,7 +54,7 @@ export function AppShell() {
               </button>
             </div>
             <p className="text-xs uppercase tracking-[0.28em] text-slate-500">TalentScope</p>
-            <h1 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Analytics</h1>
+            <h1 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Market Intelligence</h1>
           </div>
 
           <nav className="space-y-2">
@@ -108,7 +108,7 @@ export function AppShell() {
               </button>
               <div>
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">TalentScope Analytics</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Live market intelligence from job data</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Job market analysis and insights</p>
               </div>
             </div>
             <div className="text-right">

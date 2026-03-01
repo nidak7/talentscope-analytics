@@ -40,10 +40,15 @@ export function SkillGapPage() {
   return (
     <div className="space-y-4">
       <form onSubmit={runAnalysis} className="panel space-y-3 p-5">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Skill Gap Analyzer</h3>
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Skill Gap Analyzer</h3>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Compare your skills against market demand to find gaps.
+          </p>
+        </div>
         <input
           className="input-base"
-          placeholder="Role (optional)"
+          placeholder="Target role (e.g., data engineer)"
           value={role}
           onChange={(event) => setRole(event.target.value)}
         />
@@ -51,14 +56,14 @@ export function SkillGapPage() {
           className="input-base min-h-28"
           value={knownSkills}
           onChange={(event) => setKnownSkills(event.target.value)}
-          placeholder="Known skills separated by commas"
+          placeholder="Your skills separated by commas"
         />
         <button
           type="submit"
           disabled={loading}
           className="cta-btn"
         >
-          {loading ? "Analyzing..." : "Analyze Skill Gap"}
+          {loading ? "Analyzing..." : "Analyze Gap"}
         </button>
       </form>
 
