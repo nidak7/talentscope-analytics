@@ -53,3 +53,8 @@ export async function fetchBootstrapStatus(): Promise<BootstrapStatus> {
   const response = await http.get<BootstrapStatus>("/auth/bootstrap-status");
   return response.data;
 }
+
+export async function claimAdminRole() {
+  const response = await http.post("/auth/claim-admin");
+  return response.data;
+}
