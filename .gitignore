@@ -30,4 +30,7 @@ Thumbs.db
 # Build
 *.log
 backend/.coverage
-
+*-live.err
+*-live.log
+*-tunnel.err
+*-tunnel.log

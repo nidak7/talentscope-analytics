@@ -15,6 +15,7 @@ TalentScope Analytics is a production-style full stack job market intelligence p
 - Live job ingestion via Adzuna API (no mocked listing data)
 - Manual + scheduled sync pipeline with ingestion logs
 - spaCy-powered skill extraction and normalization
+- Live job listings feed endpoint for latest postings
 - Market insight analytics:
   - total jobs analyzed
   - top skills
@@ -139,6 +140,7 @@ docker compose up --build
   - `POST /api/v1/auth/signup`
   - `POST /api/v1/auth/login`
   - `GET /api/v1/auth/me` (protected)
+- On a fresh database, the **first signup user automatically gets admin role**.
 - To create first admin:
   - Set `ADMIN_BOOTSTRAP_KEY` in backend env
   - Call `POST /api/v1/auth/seed-admin` with `bootstrap_key`
@@ -158,7 +160,9 @@ ADZUNA_APP_KEY=...
 
 ## Core API Routes
 
+- `GET /api/v1/auth/bootstrap-status`
 - `GET /api/v1/insights/dashboard`
+- `GET /api/v1/insights/live-jobs?limit=20&title=data+engineer`
 - `GET /api/v1/insights/role-intelligence?title=data+engineer`
 - `POST /api/v1/insights/skill-gap`
 - `POST /api/v1/admin/sync`

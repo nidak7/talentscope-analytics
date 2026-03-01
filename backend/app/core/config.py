@@ -55,6 +55,11 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> list[str]:
         return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
 
+    @property
+    def has_reliable_job_api_credentials(self) -> bool:
+        blocked_values = {"", "demo-id", "demo-key", "your-adzuna-app-id", "your-adzuna-app-key"}
+        return self.adzuna_app_id not in blocked_values and self.adzuna_app_key not in blocked_values
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

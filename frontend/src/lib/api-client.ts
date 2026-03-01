@@ -1,7 +1,9 @@
 import { http } from "./http";
 import type {
+  BootstrapStatus,
   DashboardStats,
   IngestionLog,
+  LiveJob,
   RoleIntelligence,
   SkillGapResponse,
   SyncResponse
@@ -40,3 +42,14 @@ export async function fetchIngestionLogs(): Promise<IngestionLog[]> {
   return response.data;
 }
 
+export async function fetchLiveJobs(limit = 20, title?: string): Promise<LiveJob[]> {
+  const response = await http.get<LiveJob[]>("/insights/live-jobs", {
+    params: { limit, title: title?.trim() || undefined }
+  });
+  return response.data;
+}
+
+export async function fetchBootstrapStatus(): Promise<BootstrapStatus> {
+  const response = await http.get<BootstrapStatus>("/auth/bootstrap-status");
+  return response.data;
+}

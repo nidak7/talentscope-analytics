@@ -7,6 +7,7 @@ from app.db.mongo import get_db
 from app.dependencies import get_cache
 from app.schemas.auth import UserOut
 from app.schemas.dashboard import DashboardStats
+from app.schemas.job_feed import LiveJobOut
 from app.schemas.role_intelligence import RoleIntelligenceResponse
 from app.schemas.skill_gap import SkillGapRequest, SkillGapResponse
 
@@ -46,3 +47,13 @@ async def skill_gap(
     engine: MarketInsightsEngine = Depends(get_insights_engine),
 ) -> SkillGapResponse:
     return await engine.skill_gap(payload.known_skills, payload.role)
+
+
+@router.get("/live-jobs", response_model=list[LiveJobOut])
+async def live_jobs(
+    limit: int = Query(default=20, ge=5, le=100),
+    title: str | None = Query(default=None, min_length=2, max_length=120),
+    _: UserOut = Depends(get_current_user),
+    engine: MarketInsightsEngine = Depends(get_insights_engine),
+) -> list[LiveJobOut]:
+    return await engine.live_jobs(limit=limit, title=title)

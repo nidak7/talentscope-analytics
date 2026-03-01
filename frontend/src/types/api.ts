@@ -15,6 +15,12 @@ export type AuthSession = {
   user: User;
 };
 
+export type BootstrapStatus = {
+  has_users: boolean;
+  has_admin: boolean;
+  first_user_will_be_admin: boolean;
+};
+
 export type SkillCount = {
   skill: string;
   count: number;
@@ -83,3 +89,15 @@ export type IngestionLog = {
   errors: string[];
 };
 
+export type LiveJob = {
+  id: string;
+  title: string;
+  company: string | null;
+  location: string | null;
+  salary_min: number | null;
+  salary_max: number | null;
+  is_remote: boolean;
+  posted_date: string;
+  url: string;
+  skills: string[];
+};

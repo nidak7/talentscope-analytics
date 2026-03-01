@@ -9,6 +9,25 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
 
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value: str) -> str:
+        cleaned = " ".join(value.strip().split())
+        if len(cleaned) < 2:
+            raise ValueError("full_name must contain at least 2 characters")
+        return cleaned
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, value: str) -> str:
+        if (
+            not any(char.isupper() for char in value)
+            or not any(char.islower() for char in value)
+            or not any(char.isdigit() for char in value)
+        ):
+            raise ValueError("Password must include uppercase, lowercase, and a number")
+        return value
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -48,3 +67,13 @@ class SeedAdminRequest(BaseModel):
             raise ValueError("bootstrap_key cannot be blank")
         return value
 
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, value: str) -> str:
+        if (
+            not any(char.isupper() for char in value)
+            or not any(char.islower() for char in value)
+            or not any(char.isdigit() for char in value)
+        ):
+            raise ValueError("Password must include uppercase, lowercase, and a number")
+        return value
