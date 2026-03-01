@@ -70,19 +70,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const existingToken = localStorage.getItem(TOKEN_KEY);
     const existingUser = localStorage.getItem(USER_KEY);
 
-    if (existingToken) {
+    async function hydrateSession() {
+      if (!existingToken) {
+        setLoading(false);
+        return;
+      }
+
       attachAccessToken(existingToken);
       setToken(existingToken);
-    }
-    if (existingUser) {
+
+      if (existingUser) {
+        try {
+          setUser(JSON.parse(existingUser));
+        } catch {
+          localStorage.removeItem(USER_KEY);
+        }
+      }
+
       try {
-        setUser(JSON.parse(existingUser));
+        const response = await http.get<User>("/auth/me");
+        setUser(response.data);
+        localStorage.setItem(USER_KEY, JSON.stringify(response.data));
       } catch {
-        localStorage.removeItem(USER_KEY);
+        logout();
+      } finally {
+        setLoading(false);
       }
     }
-    setLoading(false);
-  }, []);
+
+    hydrateSession().catch(() => setLoading(false));
+  }, [logout]);
 
   useEffect(() => {
     const interceptorId = http.interceptors.response.use(
@@ -114,4 +131,3 @@ export function useAuth() {
   }
   return context;
 }
-

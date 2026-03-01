@@ -20,6 +20,10 @@ export function SkillGapPage() {
       setError("Enter at least one known skill");
       return;
     }
+    if (skills.length > 25) {
+      setError("Too many skills. Keep it under 25 for a focused gap analysis.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -52,11 +56,29 @@ export function SkillGapPage() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-70"
+          className="cta-btn"
         >
           {loading ? "Analyzing..." : "Analyze Skill Gap"}
         </button>
       </form>
+
+      <div className="flex flex-wrap gap-2">
+        {[
+          "python, sql, docker",
+          "react, typescript, node.js",
+          "aws, terraform, kubernetes",
+          "excel, tableau, power bi"
+        ].map((preset) => (
+          <button
+            key={preset}
+            type="button"
+            className="subtle-btn !rounded-full !px-3 !py-1.5 !text-xs"
+            onClick={() => setKnownSkills(preset)}
+          >
+            {preset}
+          </button>
+        ))}
+      </div>
 
       {error ? (
         <div className="panel p-5 text-sm text-rose-700 dark:text-rose-300">{error}</div>
@@ -99,4 +121,3 @@ export function SkillGapPage() {
     </div>
   );
 }
-

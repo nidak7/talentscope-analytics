@@ -9,6 +9,7 @@ def test_signup_login_and_me_flow(client):
 
     data = signup_response.json()
     assert data["user"]["email"] == "alicia@example.com"
+    assert data["user"]["role"] == "admin"
     assert "access_token" in data["token"]
 
     token = data["token"]["access_token"]
@@ -57,4 +58,3 @@ def test_login_with_wrong_password_fails(client):
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid email or password"
-

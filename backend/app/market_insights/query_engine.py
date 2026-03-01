@@ -2,10 +2,12 @@ import math
 from datetime import UTC, datetime, timedelta
 from statistics import median
 
+from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.cache import AsyncTTLCache
 from app.schemas.dashboard import DashboardStats, RemoteRatio, SalaryBin, SkillCount, TrendPoint
+from app.schemas.job_feed import LiveJobOut
 from app.schemas.role_intelligence import RoleIntelligenceResponse, SalarySnapshot
 from app.schemas.skill_gap import MissingSkill, SkillGapResponse
 
@@ -103,6 +105,69 @@ class MarketInsightsEngine:
         )
         await self.cache.set(cache_key, response)
         return response
+
+    async def live_jobs(self, limit: int = 20, title: str | None = None) -> list[LiveJobOut]:
+        normalized_title = (title or "").strip().lower()
+        cache_key = f"live-jobs:{limit}:{normalized_title}"
+        cached = await self.cache.get(cache_key)
+        if cached:
+            return cached
+
+        query: dict = {}
+        if normalized_title:
+            query["title"] = {"$regex": normalized_title, "$options": "i"}
+
+        cursor = (
+            self.db["jobs"]
+            .find(
+                query,
+                {
+                    "title": 1,
+                    "company": 1,
+                    "location": 1,
+                    "salary_min": 1,
+                    "salary_max": 1,
+                    "is_remote": 1,
+                    "posted_date": 1,
+                    "url": 1,
+                    "skills": 1,
+                },
+            )
+            .sort("posted_date", -1)
+            .limit(limit)
+        )
+
+        records: list[LiveJobOut] = []
+        async for row in cursor:
+            posted_date = row.get("posted_date")
+            if isinstance(posted_date, datetime):
+                posted_date_value = posted_date.date().isoformat()
+            else:
+                posted_date_value = datetime.now(tz=UTC).date().isoformat()
+
+            row_id = row.get("_id")
+            if isinstance(row_id, ObjectId):
+                record_id = str(row_id)
+            else:
+                record_id = str(row_id or "")
+
+            records.append(
+                LiveJobOut(
+                    id=record_id,
+                    title=row.get("title", ""),
+                    company=row.get("company"),
+                    location=row.get("location"),
+                    salary_min=row.get("salary_min"),
+                    salary_max=row.get("salary_max"),
+                    is_remote=bool(row.get("is_remote", False)),
+                    posted_date=posted_date_value,
+                    url=row.get("url", ""),
+                    skills=row.get("skills", []),
+                )
+            )
+
+        await self.cache.set(cache_key, records)
+        return records
 
     async def _top_skills(self, limit: int, query: dict | None = None) -> list[SkillCount]:
         pipeline = []

@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -39,6 +40,11 @@ async def lifespan(app: FastAPI):
     app.state.cache = cache
     app.state.sync_engine = sync_engine
     app.state.scheduler = None
+
+    existing_job_count = await db["jobs"].count_documents({})
+    if existing_job_count == 0 and settings.has_reliable_job_api_credentials:
+        logger.info("No jobs found at startup. Triggering initial ingestion run.")
+        asyncio.create_task(sync_engine.run(triggered_by="startup-bootstrap"))
 
     if settings.sync_interval_minutes > 0:
         scheduler = AsyncIOScheduler()

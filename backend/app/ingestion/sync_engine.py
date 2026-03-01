@@ -76,6 +76,7 @@ class SyncEngine:
         await self.cache.invalidate_prefix("dashboard:")
         await self.cache.invalidate_prefix("role:")
         await self.cache.invalidate_prefix("skill-gap:")
+        await self.cache.invalidate_prefix("live-jobs:")
 
         return SyncResponse(
             status=status,

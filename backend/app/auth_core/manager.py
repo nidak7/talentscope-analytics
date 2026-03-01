@@ -21,11 +21,14 @@ class AuthManager:
                 detail="Email is already registered",
             )
 
+        user_count = await self.users.count_documents({})
+        assigned_role = "admin" if user_count == 0 and role == "user" else role
+
         user_doc = {
             "full_name": payload.full_name.strip(),
             "email": payload.email.lower(),
             "hashed_password": hash_password(payload.password),
-            "role": role,
+            "role": assigned_role,
             "created_at": datetime.now(tz=UTC),
         }
 
@@ -70,4 +73,3 @@ class AuthManager:
             role=user["role"],
             created_at=user["created_at"],
         )
-

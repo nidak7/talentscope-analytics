@@ -28,3 +28,23 @@ export function dateTime(value: string | null | undefined): string {
   }).format(new Date(value));
 }
 
+export function shortDate(value: string | null | undefined): string {
+  if (!value) {
+    return "N/A";
+  }
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric"
+  }).format(new Date(value));
+}
+
+export function salaryRange(min: number | null, max: number | null): string {
+  if (min === null && max === null) {
+    return "Not disclosed";
+  }
+  if (min !== null && max !== null) {
+    return `${asCurrency(min)} - ${asCurrency(max)}`;
+  }
+  return asCurrency(min ?? max);
+}

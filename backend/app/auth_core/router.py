@@ -57,3 +57,13 @@ async def seed_admin(payload: SeedAdminRequest, db=Depends(get_db)) -> UserOut:
 async def me(current_user: UserOut = Depends(get_current_user)) -> UserOut:
     return current_user
 
+
+@router.get("/bootstrap-status")
+async def bootstrap_status(db=Depends(get_db)) -> dict[str, bool]:
+    user_count = await db["users"].count_documents({})
+    admin_count = await db["users"].count_documents({"role": "admin"})
+    return {
+        "has_users": user_count > 0,
+        "has_admin": admin_count > 0,
+        "first_user_will_be_admin": user_count == 0,
+    }

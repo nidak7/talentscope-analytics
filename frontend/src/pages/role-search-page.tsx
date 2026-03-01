@@ -13,10 +13,14 @@ export function RoleSearchPage() {
 
   async function onSearch(event: React.FormEvent) {
     event.preventDefault();
+    if (query.trim().length < 2) {
+      setError("Enter at least 2 characters for role title");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchRoleIntelligence(query);
+      const response = await fetchRoleIntelligence(query.trim());
       setResult(response);
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Failed to load role intelligence");
@@ -38,11 +42,27 @@ export function RoleSearchPage() {
         />
         <button
           type="submit"
-          className="rounded-xl bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+          className="cta-btn"
         >
           Analyze Role
         </button>
       </form>
+
+      <div className="flex flex-wrap gap-2">
+        {["data engineer", "backend developer", "devops engineer", "product manager"].map((preset) => (
+          <button
+            key={preset}
+            type="button"
+            className="subtle-btn !rounded-full !px-3 !py-1.5 !text-xs"
+            onClick={() => {
+              setQuery(preset);
+              setError(null);
+            }}
+          >
+            {preset}
+          </button>
+        ))}
+      </div>
 
       {loading ? <LoadingPanel rows={6} /> : null}
 
@@ -105,9 +125,14 @@ export function RoleSearchPage() {
           </div>
 
           <HiringTrendChart data={result.hiring_trend} />
+
+          {!result.total_jobs ? (
+            <div className="panel p-4 text-sm text-slate-600 dark:text-slate-300">
+              No jobs found for this role yet. Run a sync from the Admin page and try again.
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
   );
 }
-

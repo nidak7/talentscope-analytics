@@ -52,6 +52,9 @@ export function AdminPage() {
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Your account does not have admin access.
         </p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          Use the first account created in a fresh database, or create an admin via `/api/v1/auth/seed-admin`.
+        </p>
       </div>
     );
   }
@@ -66,11 +69,17 @@ export function AdminPage() {
           </p>
         </div>
         <button
-          className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
+          className="cta-btn"
           onClick={handleSync}
           disabled={runningSync}
         >
           {runningSync ? "Syncing..." : "Run Sync Now"}
+        </button>
+      </div>
+
+      <div className="flex justify-end">
+        <button className="subtle-btn" onClick={loadLogs}>
+          Refresh Logs
         </button>
       </div>
 
@@ -119,4 +128,3 @@ export function AdminPage() {
     </div>
   );
 }
-
