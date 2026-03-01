@@ -37,6 +37,11 @@ export async function triggerSync(): Promise<SyncResponse> {
   return response.data;
 }
 
+export async function triggerBootstrapSync(): Promise<SyncResponse> {
+  const response = await http.post<SyncResponse>("/insights/bootstrap-sync");
+  return response.data;
+}
+
 export async function fetchIngestionLogs(): Promise<IngestionLog[]> {
   const response = await http.get<IngestionLog[]>("/admin/ingestion-logs");
   return response.data;

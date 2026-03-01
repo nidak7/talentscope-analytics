@@ -7,7 +7,7 @@ import { SkillsBarChart } from "../components/charts/skills-bar-chart";
 import { LiveJobsList } from "../components/live-jobs-list";
 import { LoadingPanel } from "../components/ui/loading-panel";
 import { MetricCard } from "../components/ui/metric-card";
-import { fetchDashboard, fetchLiveJobs, triggerSync } from "../lib/api-client";
+import { fetchDashboard, fetchLiveJobs, triggerBootstrapSync, triggerSync } from "../lib/api-client";
 import { compactNumber } from "../lib/formatters";
 import { useAuth } from "../state/auth-context";
 import type { DashboardStats, LiveJob } from "../types/api";
@@ -82,19 +82,14 @@ export function DashboardPage() {
   }
 
   async function runSyncNow() {
-    if (user?.role !== "admin") {
-      setNotice("Only admin users can run sync. First signup user is auto-admin.");
-      return;
-    }
-
     setSyncing(true);
     setNotice(null);
     try {
-      const result = await triggerSync();
+      const result = user?.role === "admin" ? await triggerSync() : await triggerBootstrapSync();
       setNotice(`Sync finished with status '${result.status}'. Jobs processed: ${result.jobs_processed}.`);
       await Promise.all([loadDashboard(), loadJobs(filter)]);
     } catch (err: any) {
-      setNotice(err?.response?.data?.detail || "Sync failed. Check Adzuna credentials.");
+      setNotice(err?.response?.data?.detail || "Sync failed. Check API connectivity and credentials.");
     } finally {
       setSyncing(false);
     }
@@ -157,7 +152,7 @@ export function DashboardPage() {
           </p>
           <p className="mt-1 inline-flex items-center gap-1 text-xs">
             <ShieldCheck className="h-3.5 w-3.5" />
-            First account created in this app is automatically admin.
+            Admin can run full sync; users can run bootstrap sync for initial data.
           </p>
         </section>
       ) : null}

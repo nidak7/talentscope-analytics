@@ -13,6 +13,7 @@ TalentScope Analytics is a production-style full stack job market intelligence p
 - FastAPI backend with async endpoints, MongoDB indexing, layered modules, and structured logging
 - JWT authentication with protected and admin-only routes
 - Live job ingestion via Adzuna API (no mocked listing data)
+- Public-feed fallback ingestion (Arbeitnow) when Adzuna credentials are unavailable
 - Manual + scheduled sync pipeline with ingestion logs
 - spaCy-powered skill extraction and normalization
 - Live job listings feed endpoint for latest postings
@@ -149,6 +150,7 @@ docker compose up --build
 ## Data Ingestion
 
 - Manual sync (admin only): `POST /api/v1/admin/sync`
+- Bootstrap sync (authenticated users): `POST /api/v1/insights/bootstrap-sync`
 - Ingestion logs (admin only): `GET /api/v1/admin/ingestion-logs`
 - Scheduled sync runs every `SYNC_INTERVAL_MINUTES`
 
@@ -159,12 +161,15 @@ ADZUNA_APP_ID=...
 ADZUNA_APP_KEY=...
 ```
 
+If Adzuna credentials are missing/invalid, the system falls back to a public job feed so dashboards are not empty.
+
 ## Core API Routes
 
 - `GET /api/v1/auth/bootstrap-status`
 - `POST /api/v1/auth/claim-admin`
 - `GET /api/v1/insights/dashboard`
 - `GET /api/v1/insights/live-jobs?limit=20&title=data+engineer`
+- `POST /api/v1/insights/bootstrap-sync`
 - `GET /api/v1/insights/role-intelligence?title=data+engineer`
 - `POST /api/v1/insights/skill-gap`
 - `POST /api/v1/admin/sync`
