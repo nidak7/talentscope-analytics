@@ -34,4 +34,7 @@ backend/.coverage
 *-live.log
 *-tunnel.err
 *-tunnel.log
+render-login.err
+tools/
+frontend/.vercel/
 Data

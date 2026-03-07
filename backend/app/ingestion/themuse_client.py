@@ -6,15 +6,13 @@ import httpx
 logger = logging.getLogger(__name__)
 
 
-class ArbeitnowClientError(Exception):
+class TheMuseClientError(Exception):
     pass
 
 
-class ArbeitnowClient:
-    """Public job feed client used as a fallback when premium providers are unavailable."""
-
+class TheMuseClient:
     def __init__(self) -> None:
-        self.base_url = "https://www.arbeitnow.com/api/job-board-api"
+        self.base_url = "https://www.themuse.com/api/public/jobs"
         self.headers = {
             "User-Agent": (
                 "TalentScopeAnalytics/1.0 (+https://talentscope-analytics.vercel.app)"
@@ -27,11 +25,11 @@ class ArbeitnowClient:
             response = await client.get(self.base_url, params=params)
 
         if response.status_code >= 400:
-            logger.error("Arbeitnow API failure %s: %s", response.status_code, response.text[:200])
-            raise ArbeitnowClientError(f"Arbeitnow request failed with status {response.status_code}")
+            logger.error("The Muse API failure %s: %s", response.status_code, response.text[:200])
+            raise TheMuseClientError(f"The Muse request failed with status {response.status_code}")
 
         payload = response.json()
-        data = payload.get("data", [])
+        data = payload.get("results", [])
         if not isinstance(data, list):
             return []
         return data

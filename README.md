@@ -9,16 +9,21 @@ Local (default):
 - Backend API docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
 
-Production (after deployment):
-- Frontend: `https://<vercel-app-url>`
-- Backend: `https://<render-app-url>`
+Production (current deployment):
+- Frontend: `https://talentscope-analytics.vercel.app`
+- Backend: `https://talentscope-analytics-api.onrender.com`
+- Backend API docs: `https://talentscope-analytics-api.onrender.com/docs`
+
+Deployment note:
+- The public deployment is live on Vercel + Render.
+- To make the hosted backend fully persistent, replace the current `MONGO_URI` on Render with your MongoDB Atlas connection string.
 
 ## Highlights
 
 - FastAPI backend with async endpoints, MongoDB indexing, layered modules, and structured logging
 - JWT authentication with protected and admin-only routes
 - Live job ingestion via Adzuna API (no mocked listing data)
-- Public-feed fallback ingestion (Arbeitnow) when Adzuna credentials are unavailable
+- Public-feed fallback ingestion (Arbeitnow, Remotive, The Muse) when Adzuna credentials are unavailable
 - Manual + scheduled sync pipeline with ingestion logs
 - spaCy-powered skill extraction and normalization
 - Market insight analytics (skills, salaries, remote ratio, hiring trends)
@@ -184,6 +189,7 @@ If Adzuna credentials are missing or invalid, the system falls back to a public 
 - Render will read `render.yaml` and prompt for required secrets:
   - `MONGO_URI`, `JWT_SECRET_KEY`, `ADMIN_BOOTSTRAP_KEY`, `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`, `CORS_ORIGINS`
 - Set `CORS_ORIGINS` to the Vercel frontend URL once deployed.
+- Current backend URL: `https://talentscope-analytics-api.onrender.com`
 
 ### Frontend on Vercel
 
@@ -191,7 +197,8 @@ If Adzuna credentials are missing or invalid, the system falls back to a public 
 - Build command: `npm run build`
 - Output directory: `dist`
 - Env var:
-  - `VITE_API_BASE_URL=https://<render-app-url>/api/v1`
+  - `VITE_API_BASE_URL=https://talentscope-analytics-api.onrender.com/api/v1`
+- Current frontend URL: `https://talentscope-analytics.vercel.app`
 
 ## Tests
 
