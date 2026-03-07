@@ -12,6 +12,8 @@ from app.core.cache import AsyncTTLCache
 from app.core.config import get_settings
 from app.ingestion.adzuna_client import AdzunaClient, AdzunaClientError
 from app.ingestion.arbeitnow_client import ArbeitnowClient, ArbeitnowClientError
+from app.ingestion.remotive_client import RemotiveClient, RemotiveClientError
+from app.ingestion.themuse_client import TheMuseClient, TheMuseClientError
 from app.schemas.sync import SyncResponse
 
 logger = logging.getLogger(__name__)
@@ -24,12 +26,14 @@ class SyncEngine:
         self.cache = cache
         self.settings = get_settings()
         self.adzuna_client = AdzunaClient()
-        self.public_client = ArbeitnowClient()
+        self.arbeitnow_client = ArbeitnowClient()
+        self.remotive_client = RemotiveClient()
+        self.themuse_client = TheMuseClient()
 
     async def run(self, triggered_by: str | None = None) -> SyncResponse:
         started_at = datetime.now(tz=UTC)
         log_doc = {
-            "source": "adzuna+arbeitnow",
+            "source": "adzuna+public-feeds",
             "status": "running",
             "started_at": started_at,
             "ended_at": None,
@@ -112,30 +116,37 @@ class SyncEngine:
         errors: list[str] = []
         jobs_processed = 0
 
-        for page in range(1, self.settings.fallback_public_pages + 1):
-            try:
-                records = await self.public_client.fetch_page(page)
-            except ArbeitnowClientError as exc:
-                errors.append(f"Arbeitnow page {page}: {exc}")
-                continue
-            except Exception as exc:
-                logger.exception("Unexpected public ingestion error on page %s", page)
-                errors.append(f"Arbeitnow page {page}: {type(exc).__name__}")
-                continue
+        public_sources = (
+            ("arbeitnow", self.arbeitnow_client.fetch_page, self._normalize_arbeitnow_job, ArbeitnowClientError),
+            ("remotive", self.remotive_client.fetch_page, self._normalize_remotive_job, RemotiveClientError),
+            ("themuse", self.themuse_client.fetch_page, self._normalize_themuse_job, TheMuseClientError),
+        )
 
-            if not records:
-                break
+        for source_name, fetch_page, normalize_job, handled_error in public_sources:
+            for page in range(1, self.settings.fallback_public_pages + 1):
+                try:
+                    records = await fetch_page(page)
+                except handled_error as exc:
+                    errors.append(f"{source_name.title()} page {page}: {exc}")
+                    break
+                except Exception as exc:
+                    logger.exception("Unexpected public ingestion error for %s page %s", source_name, page)
+                    errors.append(f"{source_name.title()} page {page}: {type(exc).__name__}")
+                    break
 
-            for raw_job in records:
-                normalized = self._normalize_public_job(raw_job)
-                if not normalized:
-                    continue
-                await self.db["jobs"].update_one(
-                    {"source": normalized["source"], "external_id": normalized["external_id"]},
-                    {"$set": normalized},
-                    upsert=True,
-                )
-                jobs_processed += 1
+                if not records:
+                    break
+
+                for raw_job in records:
+                    normalized = normalize_job(raw_job)
+                    if not normalized:
+                        continue
+                    await self.db["jobs"].update_one(
+                        {"source": normalized["source"], "external_id": normalized["external_id"]},
+                        {"$set": normalized},
+                        upsert=True,
+                    )
+                    jobs_processed += 1
 
         if jobs_processed == 0 and not errors:
             errors.append("Public job feed returned zero records.")
@@ -176,7 +187,7 @@ class SyncEngine:
             "ingested_at": datetime.now(tz=UTC),
         }
 
-    def _normalize_public_job(self, raw_job: dict[str, Any]) -> dict[str, Any] | None:
+    def _normalize_arbeitnow_job(self, raw_job: dict[str, Any]) -> dict[str, Any] | None:
         title = (raw_job.get("title") or "").strip()
         if not title:
             return None
@@ -218,6 +229,91 @@ class SyncEngine:
             "ingested_at": datetime.now(tz=UTC),
         }
 
+    def _normalize_remotive_job(self, raw_job: dict[str, Any]) -> dict[str, Any] | None:
+        title = (raw_job.get("title") or "").strip()
+        if not title:
+            return None
+
+        raw_description = raw_job.get("description") or ""
+        description = self._strip_html(raw_description).strip()
+        tags = self._coerce_text_list(raw_job.get("tags"))
+        category = str(raw_job.get("category") or "").strip()
+        location = str(raw_job.get("candidate_required_location") or "").strip() or None
+        combined_text = f"{title}\n{description}\n{category}\n{' '.join(tags)}".strip()
+        salary_min, salary_max = self._parse_salary_range(raw_job.get("salary"))
+
+        external_id = str(raw_job.get("id") or raw_job.get("url") or title)
+        company = (raw_job.get("company_name") or "").strip() or None
+        url = (raw_job.get("url") or "").strip()
+        posted_date = self._parse_datetime(str(raw_job.get("publication_date") or "")) or datetime.now(tz=UTC)
+        skills = self.extractor.extract(combined_text)
+        skills = self._merge_tag_skills(skills, [*tags, category])
+        search_keyword = self._match_keyword(combined_text)
+
+        return {
+            "source": "remotive",
+            "external_id": external_id,
+            "title": title,
+            "company": company,
+            "location": location,
+            "country": "GLOBAL",
+            "description": description or title,
+            "url": url,
+            "salary_min": salary_min,
+            "salary_max": salary_max,
+            "is_remote": True,
+            "search_keyword": search_keyword,
+            "skills": skills,
+            "posted_date": posted_date,
+            "ingested_at": datetime.now(tz=UTC),
+        }
+
+    def _normalize_themuse_job(self, raw_job: dict[str, Any]) -> dict[str, Any] | None:
+        title = (raw_job.get("name") or raw_job.get("short_name") or "").strip()
+        if not title:
+            return None
+
+        raw_description = raw_job.get("contents") or ""
+        description = self._strip_html(raw_description).strip()
+        company = self._extract_named_value(raw_job.get("company"))
+        locations = self._extract_named_values(raw_job.get("locations"))
+        categories = self._extract_named_values(raw_job.get("categories"))
+        levels = self._extract_named_values(raw_job.get("levels"))
+        tags = self._extract_named_values(raw_job.get("tags"))
+
+        location = ", ".join(locations[:2]) or None
+        tag_terms = [*categories, *levels, *tags]
+        combined_text = f"{title}\n{description}\n{' '.join(tag_terms)}\n{location or ''}".strip()
+
+        refs = raw_job.get("refs") or {}
+        external_id = str(raw_job.get("id") or refs.get("landing_page") or title)
+        url = str(refs.get("landing_page") or "").strip()
+        posted_date = self._parse_datetime(str(raw_job.get("publication_date") or "")) or datetime.now(tz=UTC)
+        is_remote = bool(
+            re.search(r"\b(remote|work from home|wfh|hybrid)\b", combined_text, flags=re.IGNORECASE)
+        )
+        skills = self.extractor.extract(combined_text)
+        skills = self._merge_tag_skills(skills, tag_terms)
+        search_keyword = self._match_keyword(combined_text)
+
+        return {
+            "source": "themuse",
+            "external_id": external_id,
+            "title": title,
+            "company": company,
+            "location": location,
+            "country": "GLOBAL",
+            "description": description or title,
+            "url": url,
+            "salary_min": None,
+            "salary_max": None,
+            "is_remote": is_remote,
+            "search_keyword": search_keyword,
+            "skills": skills,
+            "posted_date": posted_date,
+            "ingested_at": datetime.now(tz=UTC),
+        }
+
     @staticmethod
     def _merge_tag_skills(extracted: list[str], tags: list[Any]) -> list[str]:
         normalized = {skill.lower() for skill in extracted}
@@ -229,6 +325,68 @@ class SyncEngine:
             if canonical:
                 normalized.add(canonical)
         return sorted(normalized)
+
+    @staticmethod
+    def _coerce_text_list(value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        text = str(value).strip()
+        return [text] if text else []
+
+    @staticmethod
+    def _extract_named_value(value: Any) -> str | None:
+        values = SyncEngine._extract_named_values(value)
+        return values[0] if values else None
+
+    @staticmethod
+    def _extract_named_values(value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            flattened: list[str] = []
+            for item in value:
+                flattened.extend(SyncEngine._extract_named_values(item))
+            return flattened
+        if isinstance(value, dict):
+            name = str(value.get("name") or value.get("short_name") or "").strip()
+            return [name] if name else []
+        text = str(value).strip()
+        return [text] if text else []
+
+    @staticmethod
+    def _parse_salary_range(raw_salary: Any) -> tuple[float | None, float | None]:
+        text = str(raw_salary or "").strip().lower()
+        if not text:
+            return None, None
+
+        multiplier = 1.0
+        if "/hour" in text or " per hour" in text or " hourly" in text:
+            multiplier = 2080.0
+        elif "/day" in text or " per day" in text:
+            multiplier = 260.0
+        elif "/month" in text or " per month" in text:
+            multiplier = 12.0
+
+        matches = re.findall(r"(\d+(?:\.\d+)?)\s*([kKmM]?)", text.replace(",", ""))
+        if not matches:
+            return None, None
+
+        values: list[float] = []
+        for number_text, suffix in matches[:2]:
+            value = float(number_text)
+            if suffix.lower() == "k":
+                value *= 1_000
+            elif suffix.lower() == "m":
+                value *= 1_000_000
+            values.append(value * multiplier)
+
+        if not values:
+            return None, None
+        if len(values) == 1:
+            return values[0], values[0]
+        return min(values), max(values)
 
     def _match_keyword(self, combined_text: str) -> str | None:
         text = combined_text.lower()
