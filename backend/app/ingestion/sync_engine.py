@@ -7,6 +7,7 @@ from typing import Any
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.analytics_engine.skill_extractor import SkillExtractor
+from app.analytics_engine.skill_catalog import SKILL_CANONICAL_MAP
 from app.core.cache import AsyncTTLCache
 from app.core.config import get_settings
 from app.ingestion.adzuna_client import AdzunaClient, AdzunaClientError
@@ -196,6 +197,7 @@ class SyncEngine:
 
         posted_date = self._parse_arbeitnow_date(raw_job.get("created_at")) or datetime.now(tz=UTC)
         skills = self.extractor.extract(combined_text)
+        skills = self._merge_tag_skills(skills, tags)
         search_keyword = self._match_keyword(combined_text)
 
         return {
@@ -215,6 +217,18 @@ class SyncEngine:
             "posted_date": posted_date,
             "ingested_at": datetime.now(tz=UTC),
         }
+
+    @staticmethod
+    def _merge_tag_skills(extracted: list[str], tags: list[Any]) -> list[str]:
+        normalized = {skill.lower() for skill in extracted}
+        for raw in tags or []:
+            tag = str(raw).strip().lower()
+            if not tag:
+                continue
+            canonical = SKILL_CANONICAL_MAP.get(tag)
+            if canonical:
+                normalized.add(canonical)
+        return sorted(normalized)
 
     def _match_keyword(self, combined_text: str) -> str | None:
         text = combined_text.lower()
@@ -263,4 +277,3 @@ class SyncEngine:
             return datetime.fromisoformat(value_text.replace("Z", "+00:00"))
         except ValueError:
             return None
-

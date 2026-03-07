@@ -110,16 +110,22 @@ export function SkillGapPage() {
 
           <div className="panel p-5 md:col-span-3">
             <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Missing High-Demand Skills</h4>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {result.missing_skills.map((item) => (
-                <li
-                  key={item.skill}
-                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                >
-                  {item.skill} <span className="text-xs text-slate-500">({item.demand_count} mentions)</span>
-                </li>
-              ))}
-            </ul>
+            {result.missing_skills.length ? (
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {result.missing_skills.map((item) => (
+                  <li
+                    key={item.skill}
+                    className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    {item.skill} <span className="text-xs text-slate-500">({item.demand_count} mentions)</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                No missing skills detected yet. Sync more data to enrich the market baseline.
+              </p>
+            )}
           </div>
         </div>
       ) : null}

@@ -88,6 +88,9 @@ export function RoleSearchPage() {
               <p className="mt-2 text-xl font-bold text-slate-900 dark:text-white">
                 {asCurrency(result.salary.median)}
               </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Range: {asCurrency(result.salary.min)} - {asCurrency(result.salary.max)}
+              </p>
             </div>
             <div className="panel p-5">
               <p className="text-xs uppercase tracking-wide text-slate-500">Market Heat Score</p>
@@ -101,25 +104,36 @@ export function RoleSearchPage() {
             <div className="panel p-5">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Top Skills for this Role</h3>
               <div className="mt-3 flex flex-wrap gap-2">
-                {result.top_skills.map((item) => (
-                  <span
-                    key={item.skill}
-                    className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800 dark:border-brand-800 dark:bg-brand-900/40 dark:text-brand-100"
-                  >
-                    {item.skill} ({item.count})
-                  </span>
-                ))}
+                {result.top_skills.length ? (
+                  result.top_skills.map((item) => (
+                    <span
+                      key={item.skill}
+                      className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800 dark:border-brand-800 dark:bg-brand-900/40 dark:text-brand-100"
+                    >
+                      {item.skill} ({item.count})
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500 dark:text-slate-400">No skills captured for this role yet.</p>
+                )}
               </div>
             </div>
             <div className="panel p-5">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Top Hiring Locations</h3>
               <ul className="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-300">
-                {result.top_locations.map((item) => (
-                  <li key={item.skill} className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
-                    <span>{item.skill}</span>
-                    <span className="font-semibold">{item.count}</span>
-                  </li>
-                ))}
+                {result.top_locations.length ? (
+                  result.top_locations.map((item) => (
+                    <li
+                      key={item.skill}
+                      className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800"
+                    >
+                      <span>{item.skill}</span>
+                      <span className="font-semibold">{item.count}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-sm text-slate-500 dark:text-slate-400">No locations available yet.</li>
+                )}
               </ul>
             </div>
           </div>

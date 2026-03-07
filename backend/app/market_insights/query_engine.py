@@ -1,4 +1,5 @@
 import math
+import re
 from datetime import UTC, datetime, timedelta
 from statistics import median
 
@@ -48,7 +49,7 @@ class MarketInsightsEngine:
         if cached:
             return cached
 
-        query = {"title": {"$regex": normalized, "$options": "i"}}
+        query = self._title_query(normalized)
         total_jobs = await self.db["jobs"].count_documents(query)
 
         top_skills = await self._top_skills(limit=8, query=query)
@@ -81,9 +82,12 @@ class MarketInsightsEngine:
 
         query = {}
         if role:
-            query = {"title": {"$regex": role.strip(), "$options": "i"}}
+            query = self._title_query(role.strip())
 
         top_skills = await self._top_skills(limit=15, query=query)
+        if role and not top_skills:
+            # Graceful fallback when role-specific slice is too small.
+            top_skills = await self._top_skills(limit=15)
         demand_total = sum(item.count for item in top_skills)
 
         matched = [item.skill for item in top_skills if item.skill in normalized_known]
@@ -115,7 +119,7 @@ class MarketInsightsEngine:
 
         query: dict = {}
         if normalized_title:
-            query["title"] = {"$regex": normalized_title, "$options": "i"}
+            query = self._title_query(normalized_title)
 
         cursor = (
             self.db["jobs"]
@@ -175,6 +179,7 @@ class MarketInsightsEngine:
             pipeline.append({"$match": query})
         pipeline.extend(
             [
+                {"$match": {"skills": {"$nin": [None, ""]}}},
                 {"$unwind": "$skills"},
                 {"$group": {"_id": "$skills", "count": {"$sum": 1}}},
                 {"$sort": {"count": -1}},
@@ -200,7 +205,8 @@ class MarketInsightsEngine:
         return [SkillCount(skill=row["_id"], count=row["count"]) for row in rows]
 
     async def _hiring_trend(self, days: int, query: dict | None = None) -> list[TrendPoint]:
-        cutoff = datetime.now(tz=UTC) - timedelta(days=days)
+        end_date = datetime.now(tz=UTC)
+        cutoff = end_date - timedelta(days=days)
         match_query = {"posted_date": {"$gte": cutoff}}
         if query:
             match_query = {**query, "posted_date": {"$gte": cutoff}}
@@ -216,9 +222,16 @@ class MarketInsightsEngine:
             {"$sort": {"_id": 1}},
         ]
         rows = await self.db["jobs"].aggregate(pipeline).to_list(length=days + 5)
-        return [TrendPoint(date=row["_id"], count=row["count"]) for row in rows]
+
+        counts_by_day = {row["_id"]: row["count"] for row in rows}
+        output: list[TrendPoint] = []
+        for offset in range(days, -1, -1):
+            day = (end_date - timedelta(days=offset)).date().isoformat()
+            output.append(TrendPoint(date=day, count=counts_by_day.get(day, 0)))
+        return output
 
     async def _salary_distribution(self) -> list[SalaryBin]:
+        total_jobs = await self.db["jobs"].count_documents({})
         cursor = self.db["jobs"].find(
             {"salary_min": {"$ne": None}, "salary_max": {"$ne": None}},
             {"salary_min": 1, "salary_max": 1},
@@ -233,6 +246,7 @@ class MarketInsightsEngine:
             "80k-110k": 0,
             "110k-140k": 0,
             "140k+": 0,
+            "Not disclosed": 0,
         }
         for amount in salaries:
             if amount < 50_000:
@@ -246,6 +260,8 @@ class MarketInsightsEngine:
             else:
                 buckets["140k+"] += 1
 
+        disclosed = len(salaries)
+        buckets["Not disclosed"] = max(total_jobs - disclosed, 0)
         return [SalaryBin(band=band, count=count) for band, count in buckets.items()]
 
     async def _salary_snapshot(self, query: dict | None = None) -> SalarySnapshot:
@@ -279,7 +295,8 @@ class MarketInsightsEngine:
         rows = await self.db["jobs"].aggregate(pipeline).to_list(length=5)
         remote = next((row["count"] for row in rows if row["_id"] is True), 0)
         onsite = next((row["count"] for row in rows if row["_id"] is False), 0)
-        return RemoteRatio(remote=remote, onsite=onsite, hybrid_or_unknown=0)
+        unknown = sum(row["count"] for row in rows if row["_id"] not in (True, False))
+        return RemoteRatio(remote=remote, onsite=onsite, hybrid_or_unknown=unknown)
 
     @staticmethod
     def _market_heat_score(total_jobs: int, remote_count: int, salary_distribution: list[SalaryBin]) -> float:
@@ -295,3 +312,8 @@ class MarketInsightsEngine:
         remote_boost = (remote_count / total_jobs) * 25 if total_jobs else 0
         salary_boost = min((median_salary or 0) / 6000, 18)
         return round(min(100.0, volume_signal + remote_boost + salary_boost), 2)
+
+    @staticmethod
+    def _title_query(value: str) -> dict:
+        escaped = re.escape(value.strip())
+        return {"title": {"$regex": escaped, "$options": "i"}}

@@ -22,16 +22,16 @@ body {
 
 .app-bg {
   background:
-    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.2), transparent 38%),
-    radial-gradient(circle at 100% 0%, rgba(251, 146, 60, 0.16), transparent 35%),
-    linear-gradient(180deg, #f8fafc 0%, #fefce8 100%);
+    radial-gradient(circle at 0% 0%, rgba(90, 120, 193, 0.16), transparent 38%),
+    radial-gradient(circle at 100% 10%, rgba(255, 183, 121, 0.18), transparent 35%),
+    linear-gradient(180deg, #f7f9fc 0%, #fbf7ef 100%);
 }
 
 .dark .app-bg {
   background:
-    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.26), transparent 36%),
-    radial-gradient(circle at 100% 0%, rgba(251, 146, 60, 0.2), transparent 32%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+    radial-gradient(circle at 0% 0%, rgba(90, 120, 193, 0.22), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(255, 183, 121, 0.18), transparent 32%),
+    linear-gradient(180deg, #0b1322 0%, #111827 100%);
 }
 
 .panel {

@@ -1,12 +1,17 @@
 # TalentScope Analytics
 
-TalentScope Analytics is a production-style full stack job market intelligence platform that ingests live listings from Adzuna, extracts demand signals with spaCy, and delivers actionable insights through a modern SaaS dashboard.
+TalentScope Analytics is a production-style full stack job market intelligence platform that ingests live listings, extracts demand signals with spaCy, and delivers market insights through a modern dashboard.
 
-## Live Link
+## URLs
 
-- Frontend (live now): `http://localhost:5173`
+Local (default):
+- Frontend: `http://localhost:5173`
 - Backend API docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
+
+Production (set after deployment):
+- Frontend: `https://<your-frontend-domain>`
+- Backend: `https://<your-backend-domain>`
 
 ## Highlights
 
@@ -16,7 +21,6 @@ TalentScope Analytics is a production-style full stack job market intelligence p
 - Public-feed fallback ingestion (Arbeitnow) when Adzuna credentials are unavailable
 - Manual + scheduled sync pipeline with ingestion logs
 - spaCy-powered skill extraction and normalization
-- Live job listings feed endpoint for latest postings
 - Market insight analytics:
   - total jobs analyzed
   - top skills
@@ -25,9 +29,9 @@ TalentScope Analytics is a production-style full stack job market intelligence p
   - hiring trend over time
 - Skill gap analyzer against current demand
 - Role intelligence search by title
-- Custom feature: **Market Heat Score** (volume + remote + salary signal)
+- Custom feature: Market Heat Score (volume + remote + salary signal)
 - React + TypeScript + Tailwind dashboard with dark/light mode and Recharts
-- Dockerized backend and frontend + `docker-compose`
+- Dockerized backend and frontend + docker-compose
 - Pytest coverage for auth API and skill extraction
 
 ## Stack
@@ -40,45 +44,43 @@ TalentScope Analytics is a production-style full stack job market intelligence p
 
 ```text
 talentscope-analytics/
-├─ backend/
-│  ├─ app/
-│  │  ├─ admin/
-│  │  ├─ analytics_engine/
-│  │  ├─ auth_core/
-│  │  ├─ core/
-│  │  ├─ db/
-│  │  ├─ ingestion/
-│  │  ├─ market_insights/
-│  │  ├─ models/
-│  │  ├─ schemas/
-│  │  ├─ dependencies.py
-│  │  └─ main.py
-│  ├─ tests/
-│  ├─ Dockerfile
-│  ├─ .env.example
-│  └─ requirements.txt
-├─ frontend/
-│  ├─ src/
-│  │  ├─ components/
-│  │  ├─ hooks/
-│  │  ├─ lib/
-│  │  ├─ pages/
-│  │  ├─ state/
-│  │  ├─ types/
-│  │  ├─ App.tsx
-│  │  └─ main.tsx
-│  ├─ Dockerfile
-│  ├─ .env.example
-│  └─ package.json
-├─ docker-compose.yml
-└─ .env.example
+backend/
+  app/
+    admin/
+    analytics_engine/
+    auth_core/
+    core/
+    db/
+    ingestion/
+    market_insights/
+    models/
+    schemas/
+    dependencies.py
+    main.py
+  tests/
+  Dockerfile
+  .env.example
+  requirements.txt
+frontend/
+  src/
+    components/
+    hooks/
+    lib/
+    pages/
+    state/
+    types/
+    App.tsx
+    main.tsx
+  Dockerfile
+  .env.example
+  package.json
+docker-compose.yml
+.env.example
 ```
 
 ## Local Setup
 
 ### 1) Environment variables
-
-Copy environment templates:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -141,7 +143,7 @@ docker compose up --build
   - `POST /api/v1/auth/signup`
   - `POST /api/v1/auth/login`
   - `GET /api/v1/auth/me` (protected)
-- On a fresh database, the **first signup user automatically gets admin role**.
+- On a fresh database, the first signup user automatically gets admin role.
 - If users exist but no admin exists, a logged-in user can claim admin via `POST /api/v1/auth/claim-admin`.
 - To create first admin:
   - Set `ADMIN_BOOTSTRAP_KEY` in backend env
@@ -150,6 +152,7 @@ docker compose up --build
 ## Data Ingestion
 
 - Manual sync (admin only): `POST /api/v1/admin/sync`
+- Reset stored data (admin only): `POST /api/v1/admin/reset-data`
 - Bootstrap sync (authenticated users): `POST /api/v1/insights/bootstrap-sync`
 - Ingestion logs (admin only): `GET /api/v1/admin/ingestion-logs`
 - Scheduled sync runs every `SYNC_INTERVAL_MINUTES`
@@ -161,7 +164,7 @@ ADZUNA_APP_ID=...
 ADZUNA_APP_KEY=...
 ```
 
-If Adzuna credentials are missing/invalid, the system falls back to a public job feed so dashboards are not empty.
+If Adzuna credentials are missing or invalid, the system falls back to a public job feed so dashboards are not empty.
 
 ## Core API Routes
 
@@ -173,6 +176,7 @@ If Adzuna credentials are missing/invalid, the system falls back to a public job
 - `GET /api/v1/insights/role-intelligence?title=data+engineer`
 - `POST /api/v1/insights/skill-gap`
 - `POST /api/v1/admin/sync`
+- `POST /api/v1/admin/reset-data`
 - `GET /api/v1/admin/ingestion-logs`
 
 ## Tests
@@ -183,7 +187,7 @@ pytest -q
 ```
 
 Included tests:
-- auth API flow (`signup`, `login`, `me`, duplicate handling)
+- auth API flow (signup, login, me, duplicate handling)
 - skill extraction logic
 
 ## Deployment
@@ -202,7 +206,7 @@ Included tests:
 ### Frontend on Vercel
 
 1. Import `frontend/` project.
-2. Framework preset: **Vite**.
+2. Framework preset: Vite.
 3. Build command: `npm run build`
 4. Output directory: `dist`
 5. Set env:
@@ -210,7 +214,7 @@ Included tests:
 
 ## Demo Script
 
-Use [demo-walkthrough.md](docs/demo-walkthrough.md) for a practical recording flow and architecture narration.
+Use `docs/demo-walkthrough.md` for a practical recording flow and architecture narration.
 
 ## Why this architecture
 

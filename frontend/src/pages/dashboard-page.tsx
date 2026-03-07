@@ -93,7 +93,6 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <section className="panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Market Intelligence Dashboard</h2>
@@ -113,7 +112,6 @@ export function DashboardPage() {
         </div>
       </section>
 
-      {/* Notice Messages */}
       {notice && (
         <section className="panel border-brand-200 bg-brand-50/70 p-4 text-sm text-brand-900 dark:border-brand-900 dark:bg-brand-900/20 dark:text-brand-100">
           {notice}
@@ -123,19 +121,18 @@ export function DashboardPage() {
       {data.total_jobs === 0 && (
         <section className="panel border-amber-200 bg-amber-50/70 p-5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0" />
             <div>
               <p className="font-semibold">No market data available yet.</p>
-              <p className="mt-1">Click <span className="font-semibold">Update Data</span> to fetch the latest job market information. This will analyze real job listings to build insights.</p>
-              {user?.role !== "admin" && (
-                <p className="mt-2 text-xs opacity-75">Note: Admin users can perform full data refresh. Regular users trigger initial data bootstrap.</p>
-              )}
+              <p className="mt-1">
+                Click <span className="font-semibold">Update Data</span> to ingest live listings and populate the
+                dashboard with skills, salaries, and hiring trends.
+              </p>
             </div>
           </div>
         </section>
       )}
 
-      {/* Key Metrics */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard 
           label="Job Listings Analyzed" 
@@ -159,13 +156,11 @@ export function DashboardPage() {
         />
       </section>
 
-      {/* Charts Row 1 */}
       <section className="grid gap-4 xl:grid-cols-2">
         <SkillsBarChart data={data.top_skills} />
         <HiringTrendChart data={data.hiring_trend} />
       </section>
 
-      {/* Charts Row 2 */}
       <section className="grid gap-4 xl:grid-cols-2">
         <SalaryDistributionChart data={data.salary_distribution} />
         <RemoteRatioChart {...data.remote_ratio} />

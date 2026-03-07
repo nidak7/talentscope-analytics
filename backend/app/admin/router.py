@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from app.auth_core.deps import require_admin
 from app.schemas.auth import UserOut
-from app.schemas.sync import IngestionLogOut, SyncResponse
+from app.schemas.sync import IngestionLogOut, ResetResponse, SyncResponse
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -37,3 +37,15 @@ async def ingestion_logs(
         )
     return records
 
+
+@router.post("/reset-data", response_model=ResetResponse)
+async def reset_data(request: Request, _: UserOut = Depends(require_admin)) -> ResetResponse:
+    db = request.app.state.db
+    jobs_result = await db["jobs"].delete_many({})
+    logs_result = await db["ingestion_logs"].delete_many({})
+    cache = request.app.state.cache
+    await cache.invalidate_prefix("dashboard:")
+    await cache.invalidate_prefix("role:")
+    await cache.invalidate_prefix("skill-gap:")
+    await cache.invalidate_prefix("live-jobs:")
+    return ResetResponse(jobs_deleted=jobs_result.deleted_count, logs_deleted=logs_result.deleted_count)
