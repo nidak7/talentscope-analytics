@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: talentscope-analytics-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: talentscope
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_MINUTES
+        value: 60
+      - key: ADMIN_BOOTSTRAP_KEY
+        sync: false
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: ADZUNA_COUNTRY
+        value: us
+      - key: ADZUNA_RESULTS_PER_PAGE
+        value: 50
+      - key: ADZUNA_PAGES_PER_SYNC
+        value: 2
+      - key: SYNC_KEYWORDS
+        value: software engineer,data analyst,devops engineer,product manager
+      - key: SYNC_INTERVAL_MINUTES
+        value: 180
+      - key: FALLBACK_PUBLIC_PAGES
+        value: 3
+      - key: SPACY_MODEL
+        value: en_core_web_sm
+      - key: CACHE_TTL_SECONDS
+        value: 300
+      - key: CORS_ORIGINS
+        sync: false
