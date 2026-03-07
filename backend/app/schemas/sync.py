@@ -1,6 +1,19 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+
+
+class SyncRequest(BaseModel):
+    country: str | None = Field(default=None, min_length=2, max_length=2)
+    max_jobs: int | None = Field(default=None, ge=50, le=5000)
+    reset_existing: bool = False
+
+    @field_validator("country")
+    @classmethod
+    def normalize_country(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.strip().lower()
 
 
 class SyncResponse(BaseModel):

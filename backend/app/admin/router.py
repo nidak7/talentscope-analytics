@@ -2,15 +2,24 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from app.auth_core.deps import require_admin
 from app.schemas.auth import UserOut
-from app.schemas.sync import IngestionLogOut, ResetResponse, SyncResponse
+from app.schemas.sync import IngestionLogOut, ResetResponse, SyncRequest, SyncResponse
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 @router.post("/sync", response_model=SyncResponse)
-async def trigger_sync(request: Request, admin_user: UserOut = Depends(require_admin)) -> SyncResponse:
+async def trigger_sync(
+    request: Request,
+    payload: SyncRequest | None = None,
+    admin_user: UserOut = Depends(require_admin),
+) -> SyncResponse:
     engine = request.app.state.sync_engine
-    return await engine.run(triggered_by=admin_user.email)
+    return await engine.run(
+        triggered_by=admin_user.email,
+        country=payload.country if payload else None,
+        max_jobs=payload.max_jobs if payload else None,
+        reset_existing=payload.reset_existing if payload else False,
+    )
 
 
 @router.get("/ingestion-logs", response_model=list[IngestionLogOut])

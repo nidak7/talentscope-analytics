@@ -78,6 +78,12 @@ export type SyncResponse = {
   ended_at?: string | null;
 };
 
+export type SyncRequest = {
+  country?: string;
+  max_jobs?: number;
+  reset_existing?: boolean;
+};
+
 export type IngestionLog = {
   id: string;
   source: string;

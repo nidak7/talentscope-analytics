@@ -15,9 +15,9 @@ class AdzunaClientError(Exception):
 class AdzunaClient:
     def __init__(self) -> None:
         self.settings = get_settings()
-        self.base_url = f"https://api.adzuna.com/v1/api/jobs/{self.settings.adzuna_country}/search"
+        self.base_url = "https://api.adzuna.com/v1/api/jobs"
 
-    async def search_jobs(self, page: int, keyword: str) -> list[dict[str, Any]]:
+    async def search_jobs(self, page: int, keyword: str, country: str | None = None) -> list[dict[str, Any]]:
         params = {
             "app_id": self.settings.adzuna_app_id,
             "app_key": self.settings.adzuna_app_key,
@@ -26,7 +26,8 @@ class AdzunaClient:
             "sort_by": "date",
             "content-type": "application/json",
         }
-        url = f"{self.base_url}/{page}"
+        country_code = (country or self.settings.adzuna_country).lower()
+        url = f"{self.base_url}/{country_code}/search/{page}"
 
         async with httpx.AsyncClient(timeout=20) as client:
             response = await client.get(url, params=params)
@@ -37,4 +38,3 @@ class AdzunaClient:
 
         payload = response.json()
         return payload.get("results", [])
-
