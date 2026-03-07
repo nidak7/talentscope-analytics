@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseURL =
-  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:8000/api/v1";
+  import.meta.env.VITE_API_BASE_URL?.trim() || "/api/v1";
 
 export const http = axios.create({
   baseURL,
@@ -15,4 +15,3 @@ export function attachAccessToken(token: string | null): void {
   }
   http.defaults.headers.common.Authorization = `Bearer ${token}`;
 }
-
