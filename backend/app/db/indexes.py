@@ -1,8 +1,33 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from pymongo.errors import OperationFailure
+
+
+async def _ensure_unique_user_email_index(db: AsyncIOMotorDatabase) -> None:
+    users = db["users"]
+    existing_indexes: dict[str, dict] = {}
+
+    async for index in users.list_indexes():
+        existing_indexes[index["name"]] = index
+
+    stale_index = existing_indexes.get("email_1")
+    if stale_index and not stale_index.get("unique", False):
+        await users.drop_index("email_1")
+
+    try:
+        await users.create_index("email", unique=True, background=True, name="uniq_users_email")
+    except OperationFailure as exc:
+        # Atlas can retain a conflicting generated name from earlier local experiments.
+        if exc.code != 86:
+            raise
+        if "email_1" in existing_indexes:
+            await users.drop_index("email_1")
+            await users.create_index("email", unique=True, background=True, name="uniq_users_email")
+        else:
+            raise
 
 
 async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
-    await db["users"].create_index("email", unique=True, background=True)
+    await _ensure_unique_user_email_index(db)
 
     await db["jobs"].create_index(
         [("source", 1), ("external_id", 1)],
