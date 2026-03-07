@@ -1,4 +1,4 @@
-import { AlertTriangle, Clock3, DatabaseZap, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertTriangle, DatabaseZap, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   claimAdminRole,
@@ -7,9 +7,10 @@ import {
   resetMarketData,
   triggerSync
 } from "../lib/api-client";
-import { dateTime } from "../lib/formatters";
+import { dateTime, pluralize } from "../lib/formatters";
 import { useAuth } from "../state/auth-context";
 import type { IngestionLog, SyncResponse } from "../types/api";
+import { InfoPopover } from "../components/ui/info-popover";
 
 export function AdminPage() {
   const { user, refreshProfile } = useAuth();
@@ -24,8 +25,8 @@ export function AdminPage() {
   const [error, setError] = useState<string | null>(null);
 
   const lastLog = logs[0] ?? null;
-  const failedRuns = useMemo(
-    () => logs.filter((item) => item.status !== "completed").length,
+  const completedRuns = useMemo(
+    () => logs.filter((item) => item.status === "completed").length,
     [logs]
   );
 
@@ -36,7 +37,7 @@ export function AdminPage() {
       const response = await fetchIngestionLogs();
       setLogs(response);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Unable to fetch ingestion logs.");
+      setError(err?.response?.data?.detail || "Unable to fetch ingestion history.");
     } finally {
       setLoadingLogs(false);
     }
@@ -62,7 +63,7 @@ export function AdminPage() {
       setSyncResult(response);
       await loadLogs();
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Sync failed.");
+      setError(err?.response?.data?.detail || "Dataset refresh failed.");
     } finally {
       setRunningSync(false);
     }
@@ -114,16 +115,16 @@ export function AdminPage() {
 
   if (user?.role !== "admin") {
     return (
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <section className="panel p-5 md:p-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Restricted area
+            Admin only
           </div>
-          <h3 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-white">Admin access is only for data operations.</h3>
+          <h3 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-white">This page maintains the dataset.</h3>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            TalentScope is mainly for analysts and users reading the market. This page only exists to refresh the
-            dataset, inspect ingestion history, and reset the analysis baseline when needed.
+            Normal users do not need this page. It is for the person operating the app: refreshing the stored job
+            listings, checking whether ingestion succeeded, and resetting the analysis when needed.
           </p>
 
           {adminMissing ? (
@@ -141,11 +142,17 @@ export function AdminPage() {
         </section>
 
         <aside className="panel p-5 md:p-6">
-          <h4 className="section-title">What this page does</h4>
+          <div className="flex items-center gap-2">
+            <h4 className="section-title">What "refresh dataset" means</h4>
+            <InfoPopover
+              title="Refresh dataset"
+              content="Refreshing the dataset pulls fresh job listings from the configured sources, extracts skills, and recalculates the dashboard. It is a maintenance action, not something a normal viewer needs to run."
+            />
+          </div>
           <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-            <li>Run a fresh ingestion cycle from the configured job feeds.</li>
-            <li>Check whether the last sync finished cleanly or produced errors.</li>
-            <li>Reset jobs and ingestion logs when you want to start over.</li>
+            <li>Pull fresh jobs from external sources.</li>
+            <li>Update the dashboard, role intelligence, and skill gap views.</li>
+            <li>Review ingestion history if something goes wrong.</li>
           </ul>
         </aside>
       </div>
@@ -154,31 +161,37 @@ export function AdminPage() {
 
   return (
     <div className="space-y-5">
-      <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="panel p-5 md:p-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-800 dark:bg-brand-900/30 dark:text-brand-100">
             <DatabaseZap className="h-3.5 w-3.5" />
-            Data control
+            Admin tools
           </div>
-          <h3 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-white">Keep the market snapshot current.</h3>
+          <div className="mt-4 flex items-start gap-2">
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">Dataset maintenance</h3>
+            <InfoPopover
+              title="Who uses this page?"
+              content="This page is for the admin or maintainer of the app. It controls the stored job dataset that powers the rest of TalentScope."
+            />
+          </div>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            This is intentionally small. Sync pulls new listings into the analytics dataset. Reset clears the stored
-            jobs and logs so you can rebuild the market view from a clean slate.
+            Refresh dataset pulls a fresh batch of jobs into the database. Reset dataset clears the stored jobs and
+            ingestion logs so the analysis can start from scratch.
           </p>
 
           <div className="mt-6 grid gap-3 md:grid-cols-3">
             <div className="metric-surface p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Sync runs</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Refresh runs</p>
               <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{logs.length}</p>
             </div>
             <div className="metric-surface p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Failed runs</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{failedRuns}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Completed runs</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{completedRuns}</p>
             </div>
             <div className="metric-surface p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Last update</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Last refresh</p>
               <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
-                {lastLog ? dateTime(lastLog.started_at) : "No sync yet"}
+                {lastLog ? dateTime(lastLog.started_at) : "No refresh yet"}
               </p>
             </div>
           </div>
@@ -200,7 +213,7 @@ export function AdminPage() {
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-              No manual action has been triggered in this session yet.
+              No dataset action has been triggered in this session yet.
             </p>
           )}
         </aside>
@@ -212,16 +225,22 @@ export function AdminPage() {
             <div className="rounded-2xl bg-brand-50 p-3 text-brand-700 dark:bg-brand-900/30 dark:text-brand-100">
               <RefreshCw className="h-5 w-5" />
             </div>
-            <div>
-              <h4 className="section-title">Run live sync</h4>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="section-title">Refresh dataset</h4>
+                <InfoPopover
+                  title="Refresh dataset"
+                  content="Runs the job ingestion pipeline, stores any new listings, extracts skills, and refreshes the market analysis used by the rest of the app."
+                />
+              </div>
               <p className="section-copy">
-                Pull fresh job listings, extract skills, and refresh the dashboard metrics.
+                Pull fresh job listings, extract skills, and refresh the market analysis.
               </p>
             </div>
           </div>
           <button className="cta-btn mt-5 inline-flex items-center gap-2" onClick={handleSync} disabled={runningSync}>
             <RefreshCw className={`h-4 w-4 ${runningSync ? "animate-spin" : ""}`} />
-            {runningSync ? "Syncing..." : "Update Data"}
+            {runningSync ? "Refreshing..." : "Refresh Dataset"}
           </button>
         </div>
 
@@ -230,10 +249,16 @@ export function AdminPage() {
             <div className="rounded-2xl bg-rose-50 p-3 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200">
               <Trash2 className="h-5 w-5" />
             </div>
-            <div>
-              <h4 className="section-title">Reset stored market data</h4>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="section-title">Reset dataset</h4>
+                <InfoPopover
+                  title="Reset dataset"
+                  content="This deletes stored jobs and ingestion logs. Use it only when you intentionally want to clear the analysis and rebuild it from scratch."
+                />
+              </div>
               <p className="section-copy">
-                Deletes stored jobs and ingestion logs. Use this when you want to rebuild the analysis from scratch.
+                Clears stored jobs and ingestion logs so the analysis can start fresh.
               </p>
             </div>
           </div>
@@ -245,9 +270,13 @@ export function AdminPage() {
               value={resetConfirm}
               onChange={(event) => setResetConfirm(event.target.value)}
             />
-            <button className="subtle-btn inline-flex items-center justify-center gap-2" onClick={handleReset} disabled={resetting}>
+            <button
+              className="subtle-btn inline-flex items-center justify-center gap-2"
+              onClick={handleReset}
+              disabled={resetting}
+            >
               <Trash2 className="h-4 w-4" />
-              {resetting ? "Resetting..." : "Reset Data"}
+              {resetting ? "Resetting..." : "Reset Dataset"}
             </button>
           </div>
         </div>
@@ -264,62 +293,76 @@ export function AdminPage() {
 
       <section className="panel p-5 md:p-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h4 className="section-title">Ingestion history</h4>
-            <p className="section-copy">Recent sync runs, who triggered them, and whether they completed cleanly.</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h4 className="section-title">Refresh history</h4>
+              <p className="section-copy">Recent dataset runs, who triggered them, and whether they finished cleanly.</p>
+            </div>
+            <InfoPopover
+              title="Refresh history"
+              content="Each card below is one refresh attempt. It records when the run started, who triggered it, how many jobs were processed, and any error message returned by the ingestion pipeline."
+            />
           </div>
           <button className="subtle-btn inline-flex items-center gap-2" onClick={loadLogs}>
-            <Clock3 className="h-4 w-4" />
-            Refresh logs
+            <RefreshCw className="h-4 w-4" />
+            Refresh history
           </button>
         </div>
 
         {loadingLogs ? (
           <div className="mt-5 space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-14 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-28 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
             ))}
           </div>
         ) : logs.length ? (
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-xs uppercase tracking-[0.18em] text-slate-500 dark:border-slate-800">
-                  <th className="pb-3 pr-4">Status</th>
-                  <th className="pb-3 pr-4">Started</th>
-                  <th className="pb-3 pr-4">Ended</th>
-                  <th className="pb-3 pr-4">Triggered by</th>
-                  <th className="pb-3 pr-4">Jobs</th>
-                  <th className="pb-3">Errors</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((item) => (
-                  <tr key={item.id} className="border-b border-slate-100 align-top dark:border-slate-800">
-                    <td className="py-3 pr-4">
+          <div className="mt-5 grid gap-3">
+            {logs.map((item) => (
+              <article key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/55">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
                           item.status === "completed"
                             ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200"
-                            : "bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200"
+                            : "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-200"
                         }`}
                       >
                         {item.status}
                       </span>
-                    </td>
-                    <td className="py-3 pr-4 text-slate-600 dark:text-slate-300">{dateTime(item.started_at)}</td>
-                    <td className="py-3 pr-4 text-slate-600 dark:text-slate-300">{dateTime(item.ended_at)}</td>
-                    <td className="py-3 pr-4 text-slate-600 dark:text-slate-300">{item.triggered_by || "system"}</td>
-                    <td className="py-3 pr-4 font-medium text-slate-900 dark:text-white">{item.jobs_processed}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-300">{item.errors[0] || "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        Started {dateTime(item.started_at)}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                      Triggered by <span className="font-medium text-slate-900 dark:text-white">{item.triggered_by || "system"}</span>
+                    </p>
+                  </div>
+
+                  <div className="text-sm text-slate-600 dark:text-slate-300 md:text-right">
+                    <p className="font-medium text-slate-900 dark:text-white">
+                      {pluralize(item.jobs_processed, "job")} processed
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Finished {dateTime(item.ended_at)}
+                    </p>
+                  </div>
+                </div>
+
+                {item.errors.length ? (
+                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">
+                    {item.errors[0]}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">No ingestion errors were recorded for this run.</p>
+                )}
+              </article>
+            ))}
           </div>
         ) : (
           <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-            No ingestion logs yet. Run a sync to create the first entry.
+            No refresh history yet. Run a dataset refresh to create the first entry.
           </div>
         )}
       </section>

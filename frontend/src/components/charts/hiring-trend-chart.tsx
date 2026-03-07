@@ -1,12 +1,13 @@
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis
 } from "recharts";
+import { InfoPopover } from "../ui/info-popover";
 import type { TrendPoint } from "../../types/api";
 
 function formatTrendDate(value: string) {
@@ -28,43 +29,45 @@ export function HiringTrendChart({ data }: { data: TrendPoint[] }) {
 
   return (
     <div className="panel p-5">
-      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <h3 className="section-title">Hiring Trend</h3>
-          <p className="section-copy">Daily job-posting volume over the last 45 days.</p>
+          <div className="flex items-center gap-2">
+            <h3 className="section-title">Hiring Trend</h3>
+            <InfoPopover
+              title="Hiring Trend"
+              content="This line shows how many of the analyzed listings were posted on each day. It helps you see whether the current market slice is quiet, steady, or picking up."
+            />
+          </div>
+          <p className="section-copy">Daily posting volume across the current dataset.</p>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Count of listings by posting date</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Jobs posted per day</p>
       </div>
       <div className="mt-3 h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#5b78c1" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#5b78c1" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+          <LineChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.16} vertical={false} />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 11 }}
-              minTickGap={26}
+              minTickGap={32}
+              axisLine={false}
+              tickLine={false}
               tickFormatter={formatTrendDate}
             />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={34} axisLine={false} tickLine={false} />
             <Tooltip
               labelFormatter={(value) => formatTrendDate(String(value))}
-              formatter={(value: number) => [`${value} listings`, "Jobs posted"]}
+              formatter={(value: number) => [`${value} jobs posted`, "Daily count"]}
             />
-            <Area
+            <Line
               type="monotone"
               dataKey="count"
               stroke="#5b78c1"
-              fill="url(#trendFill)"
-              strokeWidth={2.5}
+              strokeWidth={3}
+              dot={false}
               activeDot={{ r: 4, fill: "#4561a8" }}
             />
-          </AreaChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>

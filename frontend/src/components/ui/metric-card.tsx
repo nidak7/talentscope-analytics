@@ -1,11 +1,14 @@
+import { InfoPopover } from "./info-popover";
+
 type MetricCardProps = {
   label: string;
   value: string;
   hint?: string;
   emphasis?: "brand" | "accent" | "slate";
+  info?: string;
 };
 
-export function MetricCard({ label, value, hint, emphasis = "slate" }: MetricCardProps) {
+export function MetricCard({ label, value, hint, emphasis = "slate", info }: MetricCardProps) {
   const ringClass =
     emphasis === "brand"
       ? "border-brand-100/80 dark:border-brand-900/50"
@@ -15,8 +18,11 @@ export function MetricCard({ label, value, hint, emphasis = "slate" }: MetricCar
 
   return (
     <div className={`metric-surface p-5 ${ringClass}`}>
-      <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+        {info ? <InfoPopover content={info} title={label} /> : null}
+      </div>
+      <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
       {hint ? <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{hint}</p> : null}
     </div>
   );

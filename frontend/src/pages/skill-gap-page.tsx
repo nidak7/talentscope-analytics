@@ -1,6 +1,8 @@
 import { ArrowUpRight, CheckCircle2, Target } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { InfoPopover } from "../components/ui/info-popover";
 import { analyzeSkillGap } from "../lib/api-client";
+import { pluralize } from "../lib/formatters";
 import type { SkillGapResponse } from "../types/api";
 
 const presetSkillSets = [
@@ -74,6 +76,8 @@ export function SkillGapPage() {
 
     return "There is still a noticeable gap between your current stack and the strongest demand signals.";
   }, [result]);
+  const prioritySkillCount = result ? result.matched_skills.length + result.missing_skills.length : 0;
+  const roundedHeat = result ? Math.round(result.market_heat_score) : 0;
 
   return (
     <div className="space-y-5">
@@ -145,20 +149,41 @@ export function SkillGapPage() {
 
               <div className="mt-5 grid gap-3 md:grid-cols-3">
                 <div className="metric-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Demand score</p>
-                  <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{result.demand_score}%</p>
-                </div>
-                <div className="metric-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Market heat</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Coverage</p>
+                    <InfoPopover
+                      title="Coverage"
+                      content="Coverage shows how many of the strongest role-related skills in the current dataset are already present in your skill list."
+                    />
+                  </div>
                   <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
-                    {result.market_heat_score}/100
+                    {result.matched_skills.length}/{prioritySkillCount || 0}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    demand score: {Math.round(result.demand_score)}%
                   </p>
                 </div>
                 <div className="metric-surface p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Matched skills</p>
-                  <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
-                    {result.matched_skills.length}
-                  </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Role activity</p>
+                    <InfoPopover
+                      title="Role activity"
+                      content="This score estimates how active the selected role looks in the current dataset. It rises when more relevant skills appear across the analyzed listings."
+                    />
+                  </div>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{roundedHeat}/100</p>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">based on current role demand</p>
+                </div>
+                <div className="metric-surface p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Missing skills</p>
+                    <InfoPopover
+                      title="Missing skills"
+                      content="These are the strongest market skills that were not found in the skill list you entered."
+                    />
+                  </div>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{result.missing_skills.length}</p>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">still worth learning for this role</p>
                 </div>
               </div>
             </div>
@@ -217,19 +242,30 @@ export function SkillGapPage() {
             </div>
 
             <div className="panel p-5">
-              <h4 className="section-title">Missing High-Demand Skills</h4>
+              <div className="flex items-center gap-2">
+                <h4 className="section-title">Missing High-Demand Skills</h4>
+                <InfoPopover
+                  title="Missing High-Demand Skills"
+                  content="Each skill below appeared in the current market slice for this role, but it was not present in the skill list you entered."
+                />
+              </div>
               <p className="section-copy">These are the strongest missing signals for the selected role.</p>
               {result.missing_skills.length ? (
-                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                <ul className="mt-4 grid gap-2 md:grid-cols-2">
                   {result.missing_skills.map((item) => (
                     <li
                       key={item.skill}
                       className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                     >
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-start justify-between gap-3">
                         <span className="font-medium">{item.skill}</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">{item.demand_count} mentions</span>
+                        <span className="rounded-full bg-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                          {item.demand_count}
+                        </span>
                       </div>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        Seen in {pluralize(item.demand_count, "matching job")} for this role.
+                      </p>
                     </li>
                   ))}
                 </ul>
