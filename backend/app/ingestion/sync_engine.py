@@ -30,10 +30,20 @@ class SyncEngine:
         self.remotive_client = RemotiveClient()
         self.themuse_client = TheMuseClient()
 
-    async def run(self, triggered_by: str | None = None) -> SyncResponse:
+    async def run(
+        self,
+        triggered_by: str | None = None,
+        *,
+        country: str | None = None,
+        max_jobs: int | None = None,
+        reset_existing: bool = False,
+    ) -> SyncResponse:
         started_at = datetime.now(tz=UTC)
+        country_code = (country or self.settings.adzuna_country).lower()
+        country_specific_sync = country is not None
+        source_label = "adzuna" if self.settings.has_reliable_job_api_credentials else "public-feeds"
         log_doc = {
-            "source": "adzuna+public-feeds",
+            "source": f"{source_label}:{country_code.upper()}",
             "status": "running",
             "started_at": started_at,
             "ended_at": None,
@@ -45,18 +55,37 @@ class SyncEngine:
         errors: list[str] = []
         jobs_processed = 0
 
+        if reset_existing:
+            cleared_result = await self.db["jobs"].delete_many({})
+            logger.info("Cleared %s existing jobs before sync", cleared_result.deleted_count)
+
+        if country_specific_sync and not self.settings.has_reliable_job_api_credentials:
+            errors.append(
+                f"{country_code.upper()}-only sync requires working Adzuna credentials. "
+                "The current deployment is using public fallback feeds, which cannot provide a reliable country-specific dataset."
+            )
+
         if self.settings.has_reliable_job_api_credentials:
-            adzuna_count, adzuna_errors = await self._sync_from_adzuna()
+            adzuna_count, adzuna_errors = await self._sync_from_adzuna(country_code=country_code, max_jobs=max_jobs)
             jobs_processed += adzuna_count
             errors.extend(adzuna_errors)
-        else:
+        elif not country_specific_sync:
             errors.append("Adzuna credentials missing. Falling back to public job feed.")
 
         # Ensure the product has data even when premium credentials are absent or temporarily failing.
-        if jobs_processed == 0:
-            public_count, public_errors = await self._sync_from_public_feed()
+        if jobs_processed == 0 and not country_specific_sync:
+            public_count, public_errors = await self._sync_from_public_feed(max_jobs=max_jobs)
             jobs_processed += public_count
             errors.extend(public_errors)
+
+        if max_jobs and jobs_processed < max_jobs and self.settings.has_reliable_job_api_credentials:
+            errors.append(
+                f"Requested up to {max_jobs} jobs for {country_code.upper()}, but the source returned {jobs_processed}."
+            )
+        elif max_jobs and jobs_processed < max_jobs and not self.settings.has_reliable_job_api_credentials and not country_specific_sync:
+            errors.append(
+                f"Requested up to {max_jobs} jobs, but the public fallback feed returned {jobs_processed}."
+            )
 
         status = "success" if not errors else ("partial" if jobs_processed > 0 else "failed")
         ended_at = datetime.now(tz=UTC)
@@ -85,14 +114,16 @@ class SyncEngine:
             ended_at=ended_at,
         )
 
-    async def _sync_from_adzuna(self) -> tuple[int, list[str]]:
+    async def _sync_from_adzuna(self, country_code: str, max_jobs: int | None = None) -> tuple[int, list[str]]:
         errors: list[str] = []
         jobs_processed = 0
 
         for keyword in self.settings.sync_keyword_list:
             for page in range(1, self.settings.adzuna_pages_per_sync + 1):
+                if max_jobs is not None and jobs_processed >= max_jobs:
+                    return jobs_processed, errors
                 try:
-                    records = await self.adzuna_client.search_jobs(page=page, keyword=keyword)
+                    records = await self.adzuna_client.search_jobs(page=page, keyword=keyword, country=country_code)
                 except AdzunaClientError as exc:
                     errors.append(f"Adzuna {keyword} page {page}: {exc}")
                     continue
@@ -109,10 +140,12 @@ class SyncEngine:
                         upsert=True,
                     )
                     jobs_processed += 1
+                    if max_jobs is not None and jobs_processed >= max_jobs:
+                        return jobs_processed, errors
 
         return jobs_processed, errors
 
-    async def _sync_from_public_feed(self) -> tuple[int, list[str]]:
+    async def _sync_from_public_feed(self, max_jobs: int | None = None) -> tuple[int, list[str]]:
         errors: list[str] = []
         jobs_processed = 0
 
@@ -124,6 +157,8 @@ class SyncEngine:
 
         for source_name, fetch_page, normalize_job, handled_error in public_sources:
             for page in range(1, self.settings.fallback_public_pages + 1):
+                if max_jobs is not None and jobs_processed >= max_jobs:
+                    return jobs_processed, errors
                 try:
                     records = await fetch_page(page)
                 except handled_error as exc:
@@ -147,6 +182,8 @@ class SyncEngine:
                         upsert=True,
                     )
                     jobs_processed += 1
+                    if max_jobs is not None and jobs_processed >= max_jobs:
+                        return jobs_processed, errors
 
         if jobs_processed == 0 and not errors:
             errors.append("Public job feed returned zero records.")

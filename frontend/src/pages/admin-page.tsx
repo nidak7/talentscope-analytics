@@ -1,4 +1,4 @@
-import { AlertTriangle, DatabaseZap, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertTriangle, DatabaseZap, MapPinned, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   claimAdminRole,
@@ -18,6 +18,7 @@ export function AdminPage() {
   const [syncResult, setSyncResult] = useState<SyncResponse | null>(null);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [runningSync, setRunningSync] = useState(false);
+  const [runningIndiaSync, setRunningIndiaSync] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [resetConfirm, setResetConfirm] = useState("");
   const [claimingAdmin, setClaimingAdmin] = useState(false);
@@ -61,11 +62,35 @@ export function AdminPage() {
     try {
       const response = await triggerSync();
       setSyncResult(response);
+      if (response.status !== "success" && response.errors.length) {
+        setError(response.errors[0]);
+      }
       await loadLogs();
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Dataset refresh failed.");
     } finally {
       setRunningSync(false);
+    }
+  }
+
+  async function handleIndiaSync() {
+    setRunningIndiaSync(true);
+    setError(null);
+    try {
+      const response = await triggerSync({
+        country: "in",
+        max_jobs: 1000,
+        reset_existing: true
+      });
+      setSyncResult(response);
+      if (response.status !== "success" && response.errors.length) {
+        setError(response.errors[0]);
+      }
+      await loadLogs();
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || "India dataset refresh failed.");
+    } finally {
+      setRunningIndiaSync(false);
     }
   }
 
@@ -210,6 +235,9 @@ export function AdminPage() {
               <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 Started {dateTime(syncResult.started_at)}
               </p>
+              {syncResult.errors[0] ? (
+                <p className="mt-3 break-words text-xs text-amber-700 dark:text-amber-300">{syncResult.errors[0]}</p>
+              ) : null}
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
@@ -219,7 +247,7 @@ export function AdminPage() {
         </aside>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section className="grid gap-4 xl:grid-cols-3">
         <div className="panel p-5 md:p-6">
           <div className="flex items-start gap-3">
             <div className="rounded-2xl bg-brand-50 p-3 text-brand-700 dark:bg-brand-900/30 dark:text-brand-100">
@@ -241,6 +269,34 @@ export function AdminPage() {
           <button className="cta-btn mt-5 inline-flex items-center gap-2" onClick={handleSync} disabled={runningSync}>
             <RefreshCw className={`h-4 w-4 ${runningSync ? "animate-spin" : ""}`} />
             {runningSync ? "Refreshing..." : "Refresh Dataset"}
+          </button>
+        </div>
+
+        <div className="panel p-5 md:p-6">
+          <div className="flex items-start gap-3">
+            <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200">
+              <MapPinned className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="section-title">Build India dataset</h4>
+                <InfoPopover
+                  title="Build India dataset"
+                  content="This clears the current jobs and tries to rebuild the dataset using India as the target country, up to 1000 jobs. It requires working Adzuna credentials because the public fallback feeds are not reliable for India-only data."
+                />
+              </div>
+              <p className="section-copy">
+                Clears the current jobs and attempts an India-only refresh, capped at 1000 jobs.
+              </p>
+            </div>
+          </div>
+          <button
+            className="cta-btn mt-5 inline-flex items-center gap-2"
+            onClick={handleIndiaSync}
+            disabled={runningIndiaSync}
+          >
+            <MapPinned className="h-4 w-4" />
+            {runningIndiaSync ? "Building India dataset..." : "Load India Jobs"}
           </button>
         </div>
 
@@ -320,7 +376,7 @@ export function AdminPage() {
             {logs.map((item) => (
               <article key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/55">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
@@ -335,12 +391,13 @@ export function AdminPage() {
                         Started {dateTime(item.started_at)}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p className="mt-2 break-all text-sm text-slate-600 dark:text-slate-300">
                       Triggered by <span className="font-medium text-slate-900 dark:text-white">{item.triggered_by || "system"}</span>
                     </p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Source: {item.source}</p>
                   </div>
 
-                  <div className="text-sm text-slate-600 dark:text-slate-300 md:text-right">
+                  <div className="text-sm text-slate-600 dark:text-slate-300 md:min-w-[10rem] md:text-right">
                     <p className="font-medium text-slate-900 dark:text-white">
                       {pluralize(item.jobs_processed, "job")} processed
                     </p>
@@ -351,7 +408,7 @@ export function AdminPage() {
                 </div>
 
                 {item.errors.length ? (
-                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">
+                  <div className="mt-4 break-words rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">
                     {item.errors[0]}
                   </div>
                 ) : (

@@ -6,6 +6,7 @@ import type {
   LiveJob,
   RoleIntelligence,
   ResetResponse,
+  SyncRequest,
   SkillGapResponse,
   SyncResponse
 } from "../types/api";
@@ -33,8 +34,8 @@ export async function analyzeSkillGap(
   return response.data;
 }
 
-export async function triggerSync(): Promise<SyncResponse> {
-  const response = await http.post<SyncResponse>("/admin/sync");
+export async function triggerSync(payload?: SyncRequest): Promise<SyncResponse> {
+  const response = await http.post<SyncResponse>("/admin/sync", payload ?? {});
   return response.data;
 }
 
