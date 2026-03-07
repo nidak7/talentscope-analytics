@@ -19,4 +19,3 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
 
     await db["ingestion_logs"].create_index("started_at", background=True)
     await db["ingestion_logs"].create_index("status", background=True)
-

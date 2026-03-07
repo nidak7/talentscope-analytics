@@ -14,9 +14,9 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
     <div className="panel p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Live Job Listings</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Latest Ingested Listings</h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Latest ingested jobs with direct external links.
+            Sample of recent listings used for market analysis.
           </p>
         </div>
         <input
@@ -44,12 +44,12 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
                 <div>
                   <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{job.title}</h4>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    {job.company || "Unknown company"} • {shortDate(job.posted_date)}
+                    {job.company || "Unknown company"} | {shortDate(job.posted_date)}
                   </p>
                   <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
                     <MapPin className="mr-1 inline h-3.5 w-3.5" />
                     {job.location || "Location not specified"}
-                    {job.is_remote ? " • Remote-friendly" : ""}
+                    {job.is_remote ? " | Remote-friendly" : ""}
                   </p>
                   <p className="mt-1 text-xs font-medium text-slate-700 dark:text-slate-200">
                     {salaryRange(job.salary_min, job.salary_max)}
@@ -86,10 +86,11 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
         </div>
       ) : (
         <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-          No jobs found for this filter yet. Trigger a sync from the Admin page.
+          No jobs found for this filter yet. Sync new listings and try again.
         </div>
       )}
     </div>
   );
 }
+
 

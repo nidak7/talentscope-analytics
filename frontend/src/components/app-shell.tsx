@@ -17,14 +17,17 @@ import { useAuth } from "../state/auth-context";
 const navItems = [
   { label: "Market Overview", to: "/dashboard", icon: BarChart3 },
   { label: "Role Intelligence", to: "/roles", icon: Search },
-  { label: "Skill Gap Analysis", to: "/skill-gap", icon: Brain },
-  { label: "Data Sync", to: "/admin", icon: DatabaseZap }
+  { label: "Skill Gap Analysis", to: "/skill-gap", icon: Brain }
 ];
 
 export function AppShell() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const visibleNav =
+    user?.role === "admin"
+      ? [...navItems, { label: "Data Sync", to: "/admin", icon: DatabaseZap }]
+      : navItems;
 
   return (
     <div className="app-bg min-h-screen">
@@ -58,7 +61,7 @@ export function AppShell() {
           </div>
 
           <nav className="space-y-2">
-            {navItems.map((item) => (
+            {visibleNav.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -120,7 +123,7 @@ export function AppShell() {
           </header>
 
           <section className="flex flex-wrap gap-2 lg:hidden">
-            {navItems.map((item) => (
+            {visibleNav.map((item) => (
               <NavLink
                 key={`mobile-chip-${item.to}`}
                 to={item.to}
@@ -143,4 +146,3 @@ export function AppShell() {
     </div>
   );
 }
-

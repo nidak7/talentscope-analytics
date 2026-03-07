@@ -5,6 +5,7 @@ import type {
   IngestionLog,
   LiveJob,
   RoleIntelligence,
+  ResetResponse,
   SkillGapResponse,
   SyncResponse
 } from "../types/api";
@@ -44,6 +45,11 @@ export async function triggerBootstrapSync(): Promise<SyncResponse> {
 
 export async function fetchIngestionLogs(): Promise<IngestionLog[]> {
   const response = await http.get<IngestionLog[]>("/admin/ingestion-logs");
+  return response.data;
+}
+
+export async function resetMarketData(): Promise<ResetResponse> {
+  const response = await http.post<ResetResponse>("/admin/reset-data");
   return response.data;
 }
 

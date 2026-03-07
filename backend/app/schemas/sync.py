@@ -21,3 +21,7 @@ class IngestionLogOut(BaseModel):
     jobs_processed: int
     errors: list[str]
 
+
+class ResetResponse(BaseModel):
+    jobs_deleted: int
+    logs_deleted: int

@@ -89,6 +89,11 @@ export type IngestionLog = {
   errors: string[];
 };
 
+export type ResetResponse = {
+  jobs_deleted: number;
+  logs_deleted: number;
+};
+
 export type LiveJob = {
   id: string;
   title: string;

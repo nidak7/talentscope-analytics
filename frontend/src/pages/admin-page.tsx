@@ -3,6 +3,7 @@ import {
   claimAdminRole,
   fetchBootstrapStatus,
   fetchIngestionLogs,
+  resetMarketData,
   triggerSync
 } from "../lib/api-client";
 import { dateTime } from "../lib/formatters";
@@ -15,6 +16,8 @@ export function AdminPage() {
   const [syncResult, setSyncResult] = useState<SyncResponse | null>(null);
   const [loadingLogs, setLoadingLogs] = useState(true);
   const [runningSync, setRunningSync] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState("");
   const [claimingAdmin, setClaimingAdmin] = useState(false);
   const [adminMissing, setAdminMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +77,31 @@ export function AdminPage() {
     }
   }
 
+  async function handleReset() {
+    if (resetConfirm.trim().toUpperCase() !== "RESET") {
+      setError("Type RESET to confirm data reset.");
+      return;
+    }
+    setResetting(true);
+    setError(null);
+    try {
+      const response = await resetMarketData();
+      setSyncResult({
+        status: "reset",
+        jobs_processed: response.jobs_deleted,
+        errors: [],
+        started_at: new Date().toISOString(),
+        ended_at: new Date().toISOString()
+      });
+      setResetConfirm("");
+      await loadLogs();
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || "Reset failed");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   if (user?.role !== "admin") {
     return (
       <div className="panel p-5">
@@ -108,6 +136,26 @@ export function AdminPage() {
         </button>
       </div>
 
+      <div className="panel flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Reset Market Data</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Clears stored jobs and logs to start analysis from scratch.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            className="input-base sm:w-40"
+            placeholder="Type RESET"
+            value={resetConfirm}
+            onChange={(event) => setResetConfirm(event.target.value)}
+          />
+          <button className="subtle-btn" onClick={handleReset} disabled={resetting}>
+            {resetting ? "Resetting..." : "Reset Data"}
+          </button>
+        </div>
+      </div>
+
       <div className="flex justify-end">
         <button className="subtle-btn" onClick={loadLogs}>
           Refresh Logs
@@ -116,7 +164,7 @@ export function AdminPage() {
 
       {syncResult ? (
         <div className="panel p-5 text-sm text-slate-700 dark:text-slate-300">
-          Last update: <span className="font-semibold">{syncResult.status}</span>,{" "}
+          Last action: <span className="font-semibold">{syncResult.status}</span>,{" "}
           {syncResult.jobs_processed} records processed.
         </div>
       ) : null}
