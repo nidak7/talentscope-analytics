@@ -56,3 +56,27 @@ async def test_country_specific_sync_uses_requested_country_and_limit(monkeypatc
     assert response.jobs_processed == 250
     assert captured == {"country_code": "in", "max_jobs": 1000}
     assert "Requested up to 1000 jobs for IN, but the source returned 250." in response.errors
+
+
+@pytest.mark.asyncio
+async def test_adzuna_sync_expands_page_limit_for_large_requested_dataset(monkeypatch):
+    db = AsyncMongoMockClient()["talentscope_test"]
+    cache = AsyncTTLCache(ttl_seconds=60)
+    engine = SyncEngine(db=db, extractor=SkillExtractor(), cache=cache)
+    engine.settings.adzuna_results_per_page = 50
+    engine.settings.adzuna_pages_per_sync = 2
+    engine.settings.sync_keywords = "software engineer,data analyst"
+
+    visited_pages: list[int] = []
+
+    async def fake_search_jobs(page: int, keyword: str, country: str | None = None):
+        visited_pages.append(page)
+        return []
+
+    monkeypatch.setattr(engine.adzuna_client, "search_jobs", fake_search_jobs)
+
+    jobs_processed, errors = await engine._sync_from_adzuna(country_code="in", max_jobs=1000)
+
+    assert jobs_processed == 0
+    assert errors == []
+    assert max(visited_pages) == 10

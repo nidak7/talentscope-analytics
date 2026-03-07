@@ -1,4 +1,5 @@
 import logging
+import math
 import re
 from datetime import UTC, datetime
 from html import unescape
@@ -117,9 +118,15 @@ class SyncEngine:
     async def _sync_from_adzuna(self, country_code: str, max_jobs: int | None = None) -> tuple[int, list[str]]:
         errors: list[str] = []
         jobs_processed = 0
+        page_limit = self.settings.adzuna_pages_per_sync
+        if max_jobs:
+            results_per_page = max(self.settings.adzuna_results_per_page, 1)
+            keyword_count = max(len(self.settings.sync_keyword_list), 1)
+            required_pages = math.ceil(max_jobs / (results_per_page * keyword_count))
+            page_limit = max(page_limit, required_pages)
 
         for keyword in self.settings.sync_keyword_list:
-            for page in range(1, self.settings.adzuna_pages_per_sync + 1):
+            for page in range(1, page_limit + 1):
                 if max_jobs is not None and jobs_processed >= max_jobs:
                     return jobs_processed, errors
                 try:
