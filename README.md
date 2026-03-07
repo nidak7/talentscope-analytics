@@ -9,9 +9,9 @@ Local (default):
 - Backend API docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
 
-Production (set after deployment):
-- Frontend: `https://<your-frontend-domain>`
-- Backend: `https://<your-backend-domain>`
+Production (after deployment):
+- Frontend: `https://<vercel-app-url>`
+- Backend: `https://<render-app-url>`
 
 ## Highlights
 
@@ -21,12 +21,7 @@ Production (set after deployment):
 - Public-feed fallback ingestion (Arbeitnow) when Adzuna credentials are unavailable
 - Manual + scheduled sync pipeline with ingestion logs
 - spaCy-powered skill extraction and normalization
-- Market insight analytics:
-  - total jobs analyzed
-  - top skills
-  - salary distribution
-  - remote vs onsite ratio
-  - hiring trend over time
+- Market insight analytics (skills, salaries, remote ratio, hiring trends)
 - Skill gap analyzer against current demand
 - Role intelligence search by title
 - Custom feature: Market Heat Score (volume + remote + salary signal)
@@ -76,6 +71,7 @@ frontend/
   package.json
 docker-compose.yml
 .env.example
+render.yaml
 ```
 
 ## Local Setup
@@ -179,6 +175,24 @@ If Adzuna credentials are missing or invalid, the system falls back to a public 
 - `POST /api/v1/admin/reset-data`
 - `GET /api/v1/admin/ingestion-logs`
 
+## Deployment (Vercel + Render)
+
+### Backend on Render
+
+- Use the included `render.yaml` in the repo root.
+- Create a new Web Service on Render from this GitHub repo.
+- Render will read `render.yaml` and prompt for required secrets:
+  - `MONGO_URI`, `JWT_SECRET_KEY`, `ADMIN_BOOTSTRAP_KEY`, `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`, `CORS_ORIGINS`
+- Set `CORS_ORIGINS` to the Vercel frontend URL once deployed.
+
+### Frontend on Vercel
+
+- Import the `frontend/` folder as a Vercel project.
+- Build command: `npm run build`
+- Output directory: `dist`
+- Env var:
+  - `VITE_API_BASE_URL=https://<render-app-url>/api/v1`
+
 ## Tests
 
 ```bash
@@ -189,28 +203,6 @@ pytest -q
 Included tests:
 - auth API flow (signup, login, me, duplicate handling)
 - skill extraction logic
-
-## Deployment
-
-### Backend on Render or Railway
-
-1. Deploy from `backend/` directory.
-2. Build command:
-   - `pip install -r requirements.txt`
-3. Start command:
-   - `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Set environment variables from `backend/.env.example`.
-5. Use MongoDB Atlas URI for `MONGO_URI`.
-6. Ensure `CORS_ORIGINS` includes frontend domain.
-
-### Frontend on Vercel
-
-1. Import `frontend/` project.
-2. Framework preset: Vite.
-3. Build command: `npm run build`
-4. Output directory: `dist`
-5. Set env:
-   - `VITE_API_BASE_URL=https://<your-backend-domain>/api/v1`
 
 ## Demo Script
 
