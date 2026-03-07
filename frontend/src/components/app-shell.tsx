@@ -3,14 +3,15 @@ import {
   Brain,
   DatabaseZap,
   LogOut,
+  Orbit,
   Menu,
   MoonStar,
   Search,
   SunMedium,
   X
 } from "lucide-react";
-import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../state/auth-context";
 
@@ -20,18 +21,42 @@ const navItems = [
   { label: "Skill Gap Analysis", to: "/skill-gap", icon: Brain }
 ];
 
+const pageMeta: Record<string, { title: string; summary: string }> = {
+  "/dashboard": {
+    title: "Market Overview",
+    summary: "Live demand, salary signals, remote split, and current listings in one place."
+  },
+  "/roles": {
+    title: "Role Intelligence",
+    summary: "Search a title and see what the market is actually asking for right now."
+  },
+  "/skill-gap": {
+    title: "Skill Gap Analysis",
+    summary: "Compare your current stack with what employers keep repeating in live listings."
+  },
+  "/admin": {
+    title: "Data Sync",
+    summary: "Refresh the dataset, inspect ingestion history, and manage the analysis baseline."
+  }
+};
+
 export function AppShell() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const visibleNav =
     user?.role === "admin"
       ? [...navItems, { label: "Data Sync", to: "/admin", icon: DatabaseZap }]
       : navItems;
+  const currentMeta = useMemo(
+    () => pageMeta[location.pathname] ?? pageMeta["/dashboard"],
+    [location.pathname]
+  );
 
   return (
     <div className="app-bg min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-[1300px] gap-4 p-4 md:p-6">
+      <div className="mx-auto flex min-h-screen max-w-[1360px] gap-4 p-3 md:p-5 lg:gap-5">
         {mobileMenuOpen ? (
           <button
             className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[2px] lg:hidden"
@@ -41,13 +66,13 @@ export function AppShell() {
         ) : null}
 
         <aside
-          className={`panel fixed inset-y-4 left-4 z-40 w-72 flex-col p-4 transition-transform lg:sticky lg:top-4 lg:flex lg:h-[calc(100vh-2rem)] lg:w-64 ${
+          className={`panel fixed inset-y-3 left-3 z-40 w-[min(20rem,calc(100vw-1.5rem))] flex-col overflow-y-auto p-4 transition-transform duration-200 lg:sticky lg:top-5 lg:flex lg:h-[calc(100vh-2.5rem)] lg:w-72 ${
             mobileMenuOpen ? "flex translate-x-0" : "hidden -translate-x-[110%] lg:translate-x-0"
           }`}
         >
           <div className="mb-7 border-b border-slate-200 pb-4 dark:border-slate-800">
             <div className="mb-3 flex items-center justify-between lg:hidden">
-              <span className="text-xs uppercase tracking-[0.28em] text-slate-500">Navigation</span>
+              <span className="text-xs uppercase tracking-[0.28em] text-slate-500">Browse</span>
               <button
                 className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                 onClick={() => setMobileMenuOpen(false)}
@@ -56,8 +81,14 @@ export function AppShell() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-xs uppercase tracking-[0.28em] text-slate-500">TalentScope</p>
-            <h1 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Market Intelligence</h1>
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-brand-50/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-800 dark:border-brand-900/60 dark:bg-brand-900/20 dark:text-brand-100">
+              <Orbit className="h-3.5 w-3.5" />
+              TalentScope
+            </div>
+            <h1 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">Analytics Console</h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              A compact view of hiring demand, salaries, skills, and current market movement.
+            </p>
           </div>
 
           <nav className="space-y-2">
@@ -99,39 +130,49 @@ export function AppShell() {
           </button>
         </aside>
 
-        <main className="w-full space-y-4">
-          <header className="panel flex items-center justify-between px-4 py-4 md:px-5">
-            <div className="flex items-center gap-3">
+        <main className="min-w-0 flex-1 space-y-4">
+          <header className="panel flex flex-col gap-3 px-4 py-4 md:px-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 flex items-start gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden dark:text-slate-200 dark:hover:bg-slate-800"
+                className="mt-0.5 rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden dark:text-slate-200 dark:hover:bg-slate-800"
                 aria-label="open menu"
               >
                 <Menu className="h-4 w-4" />
               </button>
-              <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">TalentScope Analytics</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Job market analysis and insights</p>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  {currentMeta.title}
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">TalentScope Analytics</h2>
+                <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+                  {currentMeta.summary}
+                </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{user?.full_name}</p>
-              <span className="mt-1 inline-block rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-800/70 lg:min-w-[220px] lg:justify-end lg:bg-transparent lg:p-0">
+              <div className="text-left lg:text-right">
+                <p className="max-w-[9rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300 lg:max-w-none">
+                  {user?.full_name || user?.email}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+              </div>
+              <span className="inline-block rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">
                 {user?.role}
               </span>
             </div>
           </header>
 
-          <section className="flex flex-wrap gap-2 lg:hidden">
+          <section className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
             {visibleNav.map((item) => (
               <NavLink
                 key={`mobile-chip-${item.to}`}
                 to={item.to}
                 className={({ isActive }) =>
-                  `rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  `whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
                     isActive
                       ? "bg-brand-600 text-white"
-                      : "bg-white/85 text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/85 dark:text-slate-200 dark:ring-slate-700"
+                      : "bg-white text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-700"
                   }`
                 }
               >
