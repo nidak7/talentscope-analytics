@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { InfoPopover } from "./ui/info-popover";
 import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../state/auth-context";
 
@@ -21,22 +22,30 @@ const navItems = [
   { label: "Skill Gap Analysis", to: "/skill-gap", icon: Brain }
 ];
 
-const pageMeta: Record<string, { title: string; summary: string }> = {
+const pageMeta: Record<string, { title: string; summary: string; help: string }> = {
   "/dashboard": {
     title: "Market Overview",
-    summary: "Live demand, salary signals, remote split, and current listings in one place."
+    summary: "Live demand, salary signals, remote split, and current listings in one place.",
+    help:
+      "This page summarizes the current job market dataset. It shows which skills appear most often, how many listings disclose salary, how remote-friendly the market looks, and how posting volume is moving."
   },
   "/roles": {
     title: "Role Intelligence",
-    summary: "Search a title and see what the market is actually asking for right now."
+    summary: "Search a title and see what the market is actually asking for right now.",
+    help:
+      "Use this page to inspect one role at a time. It narrows the dataset to matching titles and highlights the skills, locations, salary signal, and posting trend for that slice."
   },
   "/skill-gap": {
     title: "Skill Gap Analysis",
-    summary: "Compare your current stack with what employers keep repeating in live listings."
+    summary: "Compare your current stack with what employers keep repeating in live listings.",
+    help:
+      "This page compares the skills you enter with the strongest repeated signals in current listings for the selected role. It is a benchmark against the market, not a resume score."
   },
   "/admin": {
-    title: "Data Sync",
-    summary: "Refresh the dataset, inspect ingestion history, and manage the analysis baseline."
+    title: "Admin Tools",
+    summary: "Admin-only page for refreshing the dataset and checking ingestion history.",
+    help:
+      "Only the person maintaining the dataset needs this page. Refresh dataset pulls fresh jobs from the configured sources. Reset clears stored jobs and logs so the analysis can start from a clean base."
   }
 };
 
@@ -47,7 +56,7 @@ export function AppShell() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const visibleNav =
     user?.role === "admin"
-      ? [...navItems, { label: "Data Sync", to: "/admin", icon: DatabaseZap }]
+      ? [...navItems, { label: "Admin Tools", to: "/admin", icon: DatabaseZap }]
       : navItems;
   const currentMeta = useMemo(
     () => pageMeta[location.pathname] ?? pageMeta["/dashboard"],
@@ -141,9 +150,12 @@ export function AppShell() {
                 <Menu className="h-4 w-4" />
               </button>
               <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                  {currentMeta.title}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                    {currentMeta.title}
+                  </p>
+                  <InfoPopover title={currentMeta.title} content={currentMeta.help} />
+                </div>
                 <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">TalentScope Analytics</h2>
                 <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
                   {currentMeta.summary}

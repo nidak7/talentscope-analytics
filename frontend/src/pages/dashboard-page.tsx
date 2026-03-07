@@ -71,30 +71,31 @@ export function DashboardPage() {
     return Math.round((data.remote_ratio.remote / data.total_jobs) * 100);
   }, [data]);
 
+  const disclosedSalaryCount = useMemo(() => {
+    if (!data || data.total_jobs === 0) {
+      return 0;
+    }
+    return data.salary_distribution
+      .filter((item) => item.band !== "Not disclosed")
+      .reduce((sum, item) => sum + item.count, 0);
+  }, [data]);
+
   const salaryCoverage = useMemo(() => {
     if (!data || data.total_jobs === 0) {
       return 0;
     }
-    const disclosed = data.salary_distribution
-      .filter((item) => item.band !== "Not disclosed")
-      .reduce((sum, item) => sum + item.count, 0);
-    return Math.round((disclosed / data.total_jobs) * 100);
-  }, [data]);
+    return Math.round((disclosedSalaryCount / data.total_jobs) * 100);
+  }, [data, disclosedSalaryCount]);
 
   const leadSkill = data?.top_skills[0];
-  const bestSalaryBand = useMemo(() => {
-    if (!data) {
-      return null;
-    }
-    return data.salary_distribution
-      .filter((item) => item.band !== "Not disclosed")
-      .sort((left, right) => right.count - left.count)[0] ?? null;
-  }, [data]);
 
   const notableTitles = useMemo(
     () => Array.from(new Set(liveJobs.map((job) => job.title))).slice(0, 3),
     [liveJobs]
   );
+  const marketHeatRounded = data ? Math.round(data.market_heat_score) : 0;
+  const marketHeatLabel =
+    marketHeatRounded >= 75 ? "High activity" : marketHeatRounded >= 45 ? "Steady activity" : "Limited activity";
 
   async function refreshAll() {
     setNotice(null);
@@ -110,13 +111,13 @@ export function DashboardPage() {
       const result = user?.role === "admin" ? await triggerSync() : await triggerBootstrapSync();
       setNotice({
         tone: "brand",
-        message: `Data update finished. ${result.jobs_processed} records were processed into the market snapshot.`
+        message: `Dataset refreshed. ${result.jobs_processed} job records were pulled into the market snapshot.`
       });
       await Promise.all([loadDashboard(), loadLiveJobs(jobFilter)]);
     } catch (err: any) {
       setNotice({
         tone: "rose",
-        message: err?.response?.data?.detail || "Sync failed. Check API connectivity."
+        message: err?.response?.data?.detail || "Dataset refresh failed. The backend could not pull fresh listings."
       });
     } finally {
       setSyncing(false);
@@ -167,8 +168,9 @@ export function DashboardPage() {
                 Market Intelligence Dashboard
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                This view tracks where demand is moving: the skills showing up most often, how much salary data is
-                available, how remote-heavy the market is, and which fresh listings are shaping those numbers.
+                This page is a market summary, not a job board. It shows which skills keep appearing, how much salary
+                information is actually available, how many listings are remote-friendly, and which fresh jobs are
+                shaping those signals.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -178,7 +180,7 @@ export function DashboardPage() {
               </button>
               <button className="cta-btn inline-flex items-center gap-2" onClick={runSyncNow} disabled={syncing}>
                 <Sparkles className="h-4 w-4" />
-                {syncing ? "Updating..." : "Update Data"}
+                {syncing ? "Refreshing..." : "Refresh Dataset"}
               </button>
             </div>
           </div>
@@ -190,14 +192,16 @@ export function DashboardPage() {
                 {leadSkill ? leadSkill.skill : "Waiting for data"}
               </p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {leadSkill ? `${leadSkill.count} listings mention it.` : "Run an update to populate the dataset."}
+                {leadSkill
+                  ? `Seen in ${leadSkill.count} of ${data.total_jobs} analyzed jobs.`
+                  : "Refresh the dataset to populate this signal."}
               </p>
             </div>
             <div className="metric-surface border-amber-100/80 p-4 dark:border-amber-900/40">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Salary coverage</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">{salaryCoverage}%</p>
+              <p className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">{disclosedSalaryCount} jobs</p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {bestSalaryBand ? `Strongest disclosed band: ${bestSalaryBand.band}.` : "No salary bands yet."}
+                {salaryCoverage}% of the dataset disclosed pay.
               </p>
             </div>
             <div className="metric-surface p-4 sm:col-span-2 xl:col-span-1">
@@ -224,15 +228,15 @@ export function DashboardPage() {
           <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
             <li className="flex gap-3">
               <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-              <span>The skill chart shows what keeps recurring across recent listings, not one-time mentions.</span>
+              <span>Every chart uses the same analyzed job set, so the cards and graphs stay comparable.</span>
             </li>
             <li className="flex gap-3">
               <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-              <span>The salary and remote charts give quick coverage checks before you trust a market slice.</span>
+              <span>Salary coverage matters: if only a few jobs disclose pay, the salary view is directional, not definitive.</span>
             </li>
             <li className="flex gap-3">
               <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-              <span>The live listings panel is there to make the analysis inspectable, not abstract.</span>
+              <span>The recent listings panel is there so you can inspect the jobs behind the numbers.</span>
             </li>
           </ul>
           <div className="mt-5 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/70">
@@ -264,7 +268,7 @@ export function DashboardPage() {
             <div>
               <p className="font-semibold">No market data available yet.</p>
               <p className="mt-1">
-                Click <span className="font-semibold">Update Data</span> to ingest live listings and populate the
+                Click <span className="font-semibold">Refresh Dataset</span> to ingest live listings and populate the
                 dashboard with skills, salaries, and hiring trends.
               </p>
             </div>
@@ -276,24 +280,28 @@ export function DashboardPage() {
         <MetricCard 
           label="Job Listings Analyzed" 
           value={compactNumber(data.total_jobs)} 
-          hint="Total records in database"
+          hint="Current jobs in the analysis dataset"
           emphasis="brand"
+          info="This is the total number of job listings currently stored and used by the dashboard."
         />
         <MetricCard 
-          label="Market Heat Score" 
-          value={`${data.market_heat_score}/100`} 
-          hint="Demand intensity indicator"
+          label="Market Activity" 
+          value={`${marketHeatRounded}/100`} 
+          hint={marketHeatLabel}
           emphasis="accent"
+          info="This is the app's market heat score. It blends three signals: how many jobs are in the dataset, how many of them are remote-friendly, and how much salary information is available. It is a quick activity indicator, not a direct count."
         />
         <MetricCard 
-          label="Remote Work Ratio" 
-          value={`${remoteShare}%`} 
-          hint="Percentage of remote positions"
+          label="Remote-Friendly Jobs" 
+          value={compactNumber(data.remote_ratio.remote)} 
+          hint={`${remoteShare}% of analyzed jobs`}
+          info="This counts jobs that clearly support remote work. It does not include onsite jobs or listings where the work mode was unclear."
         />
         <MetricCard 
-          label="Salary Coverage" 
-          value={`${salaryCoverage}%`} 
-          hint="Listings with salary data"
+          label="Salary Data Available" 
+          value={compactNumber(disclosedSalaryCount)} 
+          hint={`${salaryCoverage}% of analyzed jobs`}
+          info="This counts how many analyzed jobs actually published salary information. The salary chart is based only on these jobs."
         />
       </section>
 
@@ -314,28 +322,6 @@ export function DashboardPage() {
           titleFilter={jobFilter}
           onFilterChange={setJobFilter}
         />
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="metric-surface p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Remote share</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{remoteShare}%</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Remote-friendly listings in the current mix.</p>
-        </div>
-        <div className="metric-surface p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Lead skill</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{leadSkill?.skill || "N/A"}</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {leadSkill ? `${leadSkill.count} mentions across the dataset.` : "No skill signal yet."}
-          </p>
-        </div>
-        <div className="metric-surface p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Most useful salary band</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{bestSalaryBand?.band || "N/A"}</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {bestSalaryBand ? `${bestSalaryBand.count} listings fell into this band.` : "Waiting on salary disclosures."}
-          </p>
-        </div>
       </section>
     </div>
   );

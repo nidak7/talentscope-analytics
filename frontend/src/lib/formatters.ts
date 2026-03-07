@@ -48,3 +48,7 @@ export function salaryRange(min: number | null, max: number | null): string {
   }
   return asCurrency(min ?? max);
 }
+
+export function pluralize(value: number, singular: string, plural = `${singular}s`): string {
+  return `${value} ${value === 1 ? singular : plural}`;
+}
