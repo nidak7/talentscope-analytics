@@ -85,9 +85,6 @@ class MarketInsightsEngine:
             query = self._title_query(role.strip())
 
         top_skills = await self._top_skills(limit=15, query=query)
-        if role and not top_skills:
-            # Graceful fallback when role-specific slice is too small.
-            top_skills = await self._top_skills(limit=15)
         demand_total = sum(item.count for item in top_skills)
 
         matched = [item.skill for item in top_skills if item.skill in normalized_known]
