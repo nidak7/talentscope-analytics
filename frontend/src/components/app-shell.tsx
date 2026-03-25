@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { InfoPopover } from "./ui/info-popover";
 import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../state/auth-context";
 
@@ -62,6 +61,7 @@ export function AppShell() {
     () => pageMeta[location.pathname] ?? pageMeta["/dashboard"],
     [location.pathname]
   );
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="app-bg min-h-screen">
@@ -94,9 +94,14 @@ export function AppShell() {
               <Orbit className="h-3.5 w-3.5" />
               TalentScope
             </div>
+            {isAdmin ? (
+              <div className="mt-2 inline-flex rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
+                Admin
+              </div>
+            ) : null}
             <h1 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">Analytics Console</h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              A compact view of hiring demand, salaries, skills, and current market movement.
+              Understand demand, salary signals, and skill trends quickly.
             </p>
           </div>
 
@@ -154,7 +159,6 @@ export function AppShell() {
                   <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400 sm:text-[11px]">
                     {currentMeta.title}
                   </p>
-                  <InfoPopover title={currentMeta.title} content={currentMeta.help} />
                 </div>
                 <h2 className="mt-1 text-base font-semibold text-slate-900 dark:text-white sm:text-lg">
                   TalentScope Analytics
@@ -167,11 +171,13 @@ export function AppShell() {
             <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-800/70 lg:min-w-[220px] lg:justify-end lg:bg-transparent lg:p-0">
               <div className="min-w-0 text-left lg:text-right">
                 <p className="max-w-[9rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300 lg:max-w-none">
-                  {user?.full_name || user?.email}
+                  {isAdmin ? "Admin" : user?.full_name || user?.email}
                 </p>
-                <p className="max-w-[12rem] truncate text-[11px] text-slate-500 dark:text-slate-400 lg:max-w-none">
-                  {user?.email}
-                </p>
+                {!isAdmin ? (
+                  <p className="max-w-[12rem] truncate text-[11px] text-slate-500 dark:text-slate-400 lg:max-w-none">
+                    {user?.email}
+                  </p>
+                ) : null}
               </div>
               <span className="inline-block rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">
                 {user?.role}

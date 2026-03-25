@@ -1,5 +1,4 @@
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { InfoPopover } from "../ui/info-popover";
 import type { SalaryBin } from "../../types/api";
 
 function shortenBand(value: string) {
@@ -28,13 +27,7 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
   if (!disclosedData.length) {
     return (
       <div className="panel p-4 sm:p-5">
-        <div className="flex items-center gap-2">
-          <h3 className="section-title">Salary Distribution</h3>
-          <InfoPopover
-            title="Salary Distribution"
-            content="This chart only uses listings that disclose compensation. If no salaries were published, the salary view stays empty even though the jobs are still part of the dataset."
-          />
-        </div>
+        <h3 className="section-title">Salary Distribution</h3>
         <p className="section-copy">
           None of the current listings disclosed salary. The dataset still contains {total} analyzed jobs.
         </p>
@@ -46,13 +39,7 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
     <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="section-title">Salary Distribution</h3>
-            <InfoPopover
-              title="Salary Distribution"
-              content="This view shows how disclosed salaries are spread across the current dataset. Only jobs that published salary information appear in the bars."
-            />
-          </div>
+          <h3 className="section-title">Salary Distribution</h3>
           <p className="section-copy">How disclosed salaries are spread across the analyzed job listings.</p>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">

@@ -241,24 +241,24 @@ class MarketInsightsEngine:
             salaries.append((float(row["salary_min"]) + float(row["salary_max"])) / 2)
 
         buckets = {
-            "0-50k": 0,
-            "50k-80k": 0,
-            "80k-110k": 0,
-            "110k-140k": 0,
-            "140k+": 0,
+            "0-6L": 0,
+            "6L-10L": 0,
+            "10L-20L": 0,
+            "20L-35L": 0,
+            "35L+": 0,
             "Not disclosed": 0,
         }
         for amount in salaries:
-            if amount < 50_000:
-                buckets["0-50k"] += 1
-            elif amount < 80_000:
-                buckets["50k-80k"] += 1
-            elif amount < 110_000:
-                buckets["80k-110k"] += 1
-            elif amount < 140_000:
-                buckets["110k-140k"] += 1
+            if amount < 600_000:
+                buckets["0-6L"] += 1
+            elif amount < 1_000_000:
+                buckets["6L-10L"] += 1
+            elif amount < 2_000_000:
+                buckets["10L-20L"] += 1
+            elif amount < 3_500_000:
+                buckets["20L-35L"] += 1
             else:
-                buckets["140k+"] += 1
+                buckets["35L+"] += 1
 
         disclosed = len(salaries)
         buckets["Not disclosed"] = max(total_jobs - disclosed, 0)
@@ -310,7 +310,7 @@ class MarketInsightsEngine:
     def _role_market_heat_score(total_jobs: int, remote_count: int, median_salary: float | None) -> float:
         volume_signal = math.log1p(total_jobs) * 14
         remote_boost = (remote_count / total_jobs) * 25 if total_jobs else 0
-        salary_boost = min((median_salary or 0) / 6000, 18)
+        salary_boost = min((median_salary or 0) / 300_000, 18)
         return round(min(100.0, volume_signal + remote_boost + salary_boost), 2)
 
     @staticmethod

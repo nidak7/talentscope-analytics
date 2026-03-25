@@ -1,4 +1,4 @@
-import { ArrowUpRight, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { HiringTrendChart } from "../components/charts/hiring-trend-chart";
 import { LiveJobsList } from "../components/live-jobs-list";
@@ -8,7 +8,7 @@ import { SkillsBarChart } from "../components/charts/skills-bar-chart";
 import { LoadingPanel } from "../components/ui/loading-panel";
 import { MetricCard } from "../components/ui/metric-card";
 import { fetchDashboard, fetchLiveJobs, triggerBootstrapSync, triggerSync } from "../lib/api-client";
-import { compactNumber } from "../lib/formatters";
+import { compactNumber, toDisplayLabel } from "../lib/formatters";
 import { useAuth } from "../state/auth-context";
 import type { DashboardStats, LiveJob } from "../types/api";
 
@@ -90,7 +90,7 @@ export function DashboardPage() {
   const leadSkill = data?.top_skills[0];
 
   const notableTitles = useMemo(
-    () => Array.from(new Set(liveJobs.map((job) => job.title))).slice(0, 3),
+    () => Array.from(new Set(liveJobs.map((job) => toDisplayLabel(job.title)))).slice(0, 3),
     [liveJobs]
   );
   const marketHeatRounded = data ? Math.round(data.market_heat_score) : 0;
@@ -108,16 +108,19 @@ export function DashboardPage() {
     setSyncing(true);
     setNotice(null);
     try {
-      const result = user?.role === "admin" ? await triggerSync() : await triggerBootstrapSync();
+      const result =
+        user?.role === "admin"
+          ? await triggerSync({ country: "in", max_jobs: 1000, reset_existing: true })
+          : await triggerBootstrapSync();
       setNotice({
         tone: "brand",
-        message: `Dataset refreshed. ${result.jobs_processed} job records were pulled into the market snapshot.`
+        message: `Dataset refreshed. ${result.jobs_processed} jobs loaded.`
       });
       await Promise.all([loadDashboard(), loadLiveJobs(jobFilter)]);
     } catch (err: any) {
       setNotice({
         tone: "rose",
-        message: err?.response?.data?.detail || "Dataset refresh failed. The backend could not pull fresh listings."
+        message: err?.response?.data?.detail || "Refresh failed. Please try again in a minute."
       });
     } finally {
       setSyncing(false);
@@ -156,22 +159,18 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-      <section className="grid gap-3 sm:gap-4 xl:grid-cols-[1.35fr_0.95fr]">
+      <section className="grid gap-3 sm:gap-4">
         <div className="panel p-4 sm:p-5 md:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-100">
                 <Sparkles className="h-3.5 w-3.5" />
-                Live market snapshot
+                India Market Snapshot
               </span>
               <h2 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">
                 Market Intelligence Dashboard
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                This page is a market summary, not a job board. It shows which skills keep appearing, how much salary
-                information is actually available, how many listings are remote-friendly, and which fresh jobs are
-                shaping those signals.
-              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Live demand trends from curated tech jobs.</p>
             </div>
             <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap">
               <button className="subtle-btn inline-flex items-center justify-center gap-2" onClick={refreshAll}>
@@ -180,7 +179,7 @@ export function DashboardPage() {
               </button>
               <button className="cta-btn inline-flex items-center justify-center gap-2" onClick={runSyncNow} disabled={syncing}>
                 <Sparkles className="h-4 w-4" />
-                {syncing ? "Refreshing..." : "Refresh Dataset"}
+                {syncing ? "Refreshing..." : "Refresh India Data"}
               </button>
             </div>
           </div>
@@ -189,7 +188,7 @@ export function DashboardPage() {
             <div className="metric-surface border-brand-100/80 p-4 dark:border-brand-900/40">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Top signal</p>
               <p className="mt-2 break-words text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">
-                {leadSkill ? leadSkill.skill : "Waiting for data"}
+                {leadSkill ? toDisplayLabel(leadSkill.skill) : "Waiting for data"}
               </p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {leadSkill
@@ -223,30 +222,6 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
-        <aside className="panel p-4 sm:p-5 md:p-6">
-          <h3 className="section-title">Reading the dashboard</h3>
-          <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-            <li className="flex gap-3">
-              <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-              <span>Every chart uses the same analyzed job set, so the cards and graphs stay comparable.</span>
-            </li>
-            <li className="flex gap-3">
-              <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-              <span>Salary coverage matters: if only a few jobs disclose pay, the salary view is directional, not definitive.</span>
-            </li>
-            <li className="flex gap-3">
-              <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-              <span>The recent listings panel is there so you can inspect the jobs behind the numbers.</span>
-            </li>
-          </ul>
-          <div className="mt-5 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/70">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Current dataset</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{compactNumber(data.total_jobs)}</p>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              total listings currently shaping the analysis
-            </p>
-          </div>
-        </aside>
       </section>
 
       {notice && (
@@ -280,28 +255,24 @@ export function DashboardPage() {
         <MetricCard 
           label="Job Listings Analyzed" 
           value={compactNumber(data.total_jobs)} 
-          hint="Current jobs in the analysis dataset"
+          hint="Current jobs in this dataset"
           emphasis="brand"
-          info="This is the total number of job listings currently stored and used by the dashboard."
         />
         <MetricCard 
           label="Market Activity" 
           value={`${marketHeatRounded}/100`} 
           hint={marketHeatLabel}
           emphasis="accent"
-          info="This is the app's market heat score. It blends three signals: how many jobs are in the dataset, how many of them are remote-friendly, and how much salary information is available. It is a quick activity indicator, not a direct count."
         />
         <MetricCard 
           label="Remote-Friendly Jobs" 
           value={compactNumber(data.remote_ratio.remote)} 
-          hint={`${remoteShare}% of analyzed jobs`}
-          info="This counts jobs that clearly support remote work. It does not include onsite jobs or listings where the work mode was unclear."
+          hint={`${remoteShare}% of jobs`}
         />
         <MetricCard 
           label="Salary Data Available" 
           value={compactNumber(disclosedSalaryCount)} 
-          hint={`${salaryCoverage}% of analyzed jobs`}
-          info="This counts how many analyzed jobs actually published salary information. The salary chart is based only on these jobs."
+          hint={`${salaryCoverage}% of jobs`}
         />
       </section>
 

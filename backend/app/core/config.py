@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     adzuna_app_id: str = Field(..., alias="ADZUNA_APP_ID")
     adzuna_app_key: str = Field(..., alias="ADZUNA_APP_KEY")
-    adzuna_country: str = Field(default="us", alias="ADZUNA_COUNTRY")
+    adzuna_country: str = Field(default="in", alias="ADZUNA_COUNTRY")
     adzuna_results_per_page: int = Field(default=50, alias="ADZUNA_RESULTS_PER_PAGE")
     adzuna_pages_per_sync: int = Field(default=2, alias="ADZUNA_PAGES_PER_SYNC")
     sync_keywords: str = Field(

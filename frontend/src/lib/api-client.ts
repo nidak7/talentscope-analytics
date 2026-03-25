@@ -11,6 +11,8 @@ import type {
   SyncResponse
 } from "../types/api";
 
+const SYNC_TIMEOUT_MS = 120000;
+
 export async function fetchDashboard(): Promise<DashboardStats> {
   const response = await http.get<DashboardStats>("/insights/dashboard");
   return response.data;
@@ -35,12 +37,12 @@ export async function analyzeSkillGap(
 }
 
 export async function triggerSync(payload?: SyncRequest): Promise<SyncResponse> {
-  const response = await http.post<SyncResponse>("/admin/sync", payload ?? {});
+  const response = await http.post<SyncResponse>("/admin/sync", payload ?? {}, { timeout: SYNC_TIMEOUT_MS });
   return response.data;
 }
 
 export async function triggerBootstrapSync(): Promise<SyncResponse> {
-  const response = await http.post<SyncResponse>("/insights/bootstrap-sync");
+  const response = await http.post<SyncResponse>("/insights/bootstrap-sync", {}, { timeout: SYNC_TIMEOUT_MS });
   return response.data;
 }
 

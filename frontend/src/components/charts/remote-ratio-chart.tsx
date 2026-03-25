@@ -1,5 +1,3 @@
-import { InfoPopover } from "../ui/info-popover";
-
 type Props = {
   remote: number;
   onsite: number;
@@ -29,13 +27,7 @@ export function RemoteRatioChart(props: Props) {
     <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="section-title">Remote vs Onsite</h3>
-            <InfoPopover
-              title="Remote vs Onsite"
-              content="This split is based on how each listing describes work location. Remote-friendly means the job clearly supports remote work. Hybrid or unclear means the listing did not state the work mode cleanly."
-            />
-          </div>
+          <h3 className="section-title">Remote vs Onsite</h3>
           <p className="section-copy">How the current dataset splits between remote-friendly and location-bound work.</p>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">{props.remote} remote-friendly jobs in the dataset</p>
