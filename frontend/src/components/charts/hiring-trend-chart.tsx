@@ -18,7 +18,7 @@ export function HiringTrendChart({ data }: { data: TrendPoint[] }) {
   const isEmpty = !data.length || data.every((item) => item.count === 0);
   if (isEmpty) {
     return (
-      <div className="panel p-5">
+      <div className="panel p-4 sm:p-5">
         <h3 className="section-title">Hiring Trend</h3>
         <p className="section-copy">
           No trend data yet. Sync new listings to populate the timeline.
@@ -28,7 +28,7 @@ export function HiringTrendChart({ data }: { data: TrendPoint[] }) {
   }
 
   return (
-    <div className="panel p-5">
+    <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export function HiringTrendChart({ data }: { data: TrendPoint[] }) {
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">Jobs posted per day</p>
       </div>
-      <div className="mt-3 h-72">
+      <div className="mt-3 h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.16} vertical={false} />

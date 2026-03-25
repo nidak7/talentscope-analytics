@@ -140,13 +140,13 @@ export function AdminPage() {
 
   if (user?.role !== "admin") {
     return (
-      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="panel p-5 md:p-6">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <section className="panel p-4 sm:p-5 md:p-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <ShieldCheck className="h-3.5 w-3.5" />
             Admin only
           </div>
-          <h3 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-white">This page maintains the dataset.</h3>
+          <h3 className="mt-4 text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">This page maintains the dataset.</h3>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
             Normal users do not need this page. It is for the person operating the app: refreshing the stored job
             listings, checking whether ingestion succeeded, and resetting the analysis when needed.
@@ -166,7 +166,7 @@ export function AdminPage() {
           ) : null}
         </section>
 
-        <aside className="panel p-5 md:p-6">
+        <aside className="panel p-4 sm:p-5 md:p-6">
           <div className="flex items-center gap-2">
             <h4 className="section-title">What "refresh dataset" means</h4>
             <InfoPopover
@@ -185,15 +185,15 @@ export function AdminPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="panel p-5 md:p-6">
+    <div className="space-y-4 sm:space-y-5">
+      <section className="grid gap-3 sm:gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="panel p-4 sm:p-5 md:p-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-800 dark:bg-brand-900/30 dark:text-brand-100">
             <DatabaseZap className="h-3.5 w-3.5" />
             Admin tools
           </div>
           <div className="mt-4 flex items-start gap-2">
-            <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">Dataset maintenance</h3>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">Dataset maintenance</h3>
             <InfoPopover
               title="Who uses this page?"
               content="This page is for the admin or maintainer of the app. It controls the stored job dataset that powers the rest of TalentScope."
@@ -204,7 +204,7 @@ export function AdminPage() {
             ingestion logs so the analysis can start from scratch.
           </p>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <div className="metric-surface p-4">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Refresh runs</p>
               <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{logs.length}</p>
@@ -222,7 +222,7 @@ export function AdminPage() {
           </div>
         </div>
 
-        <aside className="panel p-5 md:p-6">
+        <aside className="panel p-4 sm:p-5 md:p-6">
           <h4 className="section-title">Last action</h4>
           {syncResult ? (
             <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 dark:bg-slate-800/80 dark:text-slate-200">
@@ -247,8 +247,8 @@ export function AdminPage() {
         </aside>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-3">
-        <div className="panel p-5 md:p-6">
+      <section className="grid gap-3 sm:gap-4 xl:grid-cols-3">
+        <div className="panel p-4 sm:p-5 md:p-6">
           <div className="flex items-start gap-3">
             <div className="rounded-2xl bg-brand-50 p-3 text-brand-700 dark:bg-brand-900/30 dark:text-brand-100">
               <RefreshCw className="h-5 w-5" />
@@ -272,7 +272,7 @@ export function AdminPage() {
           </button>
         </div>
 
-        <div className="panel p-5 md:p-6">
+        <div className="panel p-4 sm:p-5 md:p-6">
           <div className="flex items-start gap-3">
             <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200">
               <MapPinned className="h-5 w-5" />
@@ -300,7 +300,7 @@ export function AdminPage() {
           </button>
         </div>
 
-        <div className="panel p-5 md:p-6">
+        <div className="panel p-4 sm:p-5 md:p-6">
           <div className="flex items-start gap-3">
             <div className="rounded-2xl bg-rose-50 p-3 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200">
               <Trash2 className="h-5 w-5" />
@@ -347,7 +347,7 @@ export function AdminPage() {
         </section>
       ) : null}
 
-      <section className="panel p-5 md:p-6">
+      <section className="panel p-4 sm:p-5 md:p-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2">
             <div>

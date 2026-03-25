@@ -65,7 +65,7 @@ export function AppShell() {
 
   return (
     <div className="app-bg min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-[1360px] gap-4 p-3 md:p-5 lg:gap-5">
+      <div className="mx-auto flex min-h-screen max-w-[1360px] gap-3 p-2.5 sm:p-3 md:p-4 lg:gap-5 lg:p-5">
         {mobileMenuOpen ? (
           <button
             className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[2px] lg:hidden"
@@ -75,7 +75,7 @@ export function AppShell() {
         ) : null}
 
         <aside
-          className={`panel fixed inset-y-3 left-3 z-40 w-[min(20rem,calc(100vw-1.5rem))] flex-col overflow-y-auto p-4 transition-transform duration-200 lg:sticky lg:top-5 lg:flex lg:h-[calc(100vh-2.5rem)] lg:w-72 ${
+          className={`panel fixed inset-y-2.5 left-2.5 z-40 w-[min(20rem,calc(100vw-1.25rem))] flex-col overflow-y-auto p-4 transition-transform duration-200 lg:sticky lg:top-5 lg:flex lg:h-[calc(100vh-2.5rem)] lg:w-72 ${
             mobileMenuOpen ? "flex translate-x-0" : "hidden -translate-x-[110%] lg:translate-x-0"
           }`}
         >
@@ -139,8 +139,8 @@ export function AppShell() {
           </button>
         </aside>
 
-        <main className="min-w-0 flex-1 space-y-4">
-          <header className="panel flex flex-col gap-3 px-4 py-4 md:px-5 lg:flex-row lg:items-center lg:justify-between">
+        <main className="min-w-0 flex-1 space-y-3 pb-20 sm:space-y-4 lg:pb-0">
+          <header className="panel flex flex-col gap-3 px-3.5 py-3.5 sm:px-4 md:px-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 flex items-start gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
@@ -151,23 +151,27 @@ export function AppShell() {
               </button>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400 sm:text-[11px]">
                     {currentMeta.title}
                   </p>
                   <InfoPopover title={currentMeta.title} content={currentMeta.help} />
                 </div>
-                <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">TalentScope Analytics</h2>
-                <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+                <h2 className="mt-1 text-base font-semibold text-slate-900 dark:text-white sm:text-lg">
+                  TalentScope Analytics
+                </h2>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
                   {currentMeta.summary}
                 </p>
               </div>
             </div>
             <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-800/70 lg:min-w-[220px] lg:justify-end lg:bg-transparent lg:p-0">
-              <div className="text-left lg:text-right">
+              <div className="min-w-0 text-left lg:text-right">
                 <p className="max-w-[9rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300 lg:max-w-none">
                   {user?.full_name || user?.email}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                <p className="max-w-[12rem] truncate text-[11px] text-slate-500 dark:text-slate-400 lg:max-w-none">
+                  {user?.email}
+                </p>
               </div>
               <span className="inline-block rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">
                 {user?.role}
@@ -175,27 +179,30 @@ export function AppShell() {
             </div>
           </header>
 
-          <section className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
-            {visibleNav.map((item) => (
-              <NavLink
-                key={`mobile-chip-${item.to}`}
-                to={item.to}
-                className={({ isActive }) =>
-                  `whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                    isActive
-                      ? "bg-brand-600 text-white"
-                      : "bg-white text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-700"
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </section>
-
           <Outlet />
         </main>
       </div>
+
+      <nav className="fixed inset-x-2.5 bottom-2.5 z-20 lg:hidden">
+        <div className="panel grid grid-cols-3 gap-1.5 px-2 py-2 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.85)]">
+          {visibleNav.slice(0, 3).map((item) => (
+            <NavLink
+              key={`mobile-bottom-${item.to}`}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition ${
+                  isActive
+                    ? "bg-brand-600 text-white"
+                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                }`
+              }
+            >
+              <item.icon className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{item.label.replace(" Analysis", "").replace(" Overview", "")}</span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
