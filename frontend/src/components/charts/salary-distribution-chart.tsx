@@ -2,6 +2,10 @@ import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, 
 import { InfoPopover } from "../ui/info-popover";
 import type { SalaryBin } from "../../types/api";
 
+function shortenBand(value: string) {
+  return value.length > 12 ? `${value.slice(0, 10)}...` : value;
+}
+
 export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
   const total = data.reduce((sum, item) => sum + item.count, 0);
   const disclosedData = data.filter((item) => item.band !== "Not disclosed");
@@ -12,7 +16,7 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
 
   if (total === 0) {
     return (
-      <div className="panel p-5">
+      <div className="panel p-4 sm:p-5">
         <h3 className="section-title">Salary Distribution</h3>
         <p className="section-copy">
           Salary data is not available yet. Sync more listings to enrich salary bands.
@@ -23,7 +27,7 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
 
   if (!disclosedData.length) {
     return (
-      <div className="panel p-5">
+      <div className="panel p-4 sm:p-5">
         <div className="flex items-center gap-2">
           <h3 className="section-title">Salary Distribution</h3>
           <InfoPopover
@@ -39,7 +43,7 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
   }
 
   return (
-    <div className="panel p-5">
+    <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -57,7 +61,7 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="h-72">
+        <div className="h-64 sm:h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={disclosedData} layout="vertical" margin={{ top: 4, right: 18, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.16} horizontal={false} />
@@ -65,11 +69,12 @@ export function SalaryDistributionChart({ data }: { data: SalaryBin[] }) {
               <YAxis
                 type="category"
                 dataKey="band"
-                width={92}
+                width={78}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
                 tickMargin={10}
+                tickFormatter={shortenBand}
               />
               <Tooltip formatter={(value: number) => [`${value} analyzed jobs`, "Listings in this pay band"]} />
               <Bar dataKey="count" fill="#7f97d2" radius={[0, 10, 10, 0]} maxBarSize={34}>

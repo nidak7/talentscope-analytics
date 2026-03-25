@@ -126,18 +126,18 @@ export function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="grid gap-4">
-        <div className="grid gap-4 xl:grid-cols-[1.4fr_0.9fr]">
+      <div className="grid gap-3 sm:gap-4">
+        <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1.4fr_0.9fr]">
           <LoadingPanel rows={4} />
           <LoadingPanel rows={5} />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <LoadingPanel rows={2} />
           <LoadingPanel rows={2} />
           <LoadingPanel rows={2} />
           <LoadingPanel rows={2} />
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
           <LoadingPanel rows={6} />
           <LoadingPanel rows={6} />
         </div>
@@ -155,16 +155,16 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 xl:grid-cols-[1.35fr_0.95fr]">
-        <div className="panel p-5 md:p-6">
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      <section className="grid gap-3 sm:gap-4 xl:grid-cols-[1.35fr_0.95fr]">
+        <div className="panel p-4 sm:p-5 md:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 Live market snapshot
               </span>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">
+              <h2 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">
                 Market Intelligence Dashboard
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
@@ -173,12 +173,12 @@ export function DashboardPage() {
                 shaping those signals.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button className="subtle-btn inline-flex items-center gap-2" onClick={refreshAll}>
+            <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap">
+              <button className="subtle-btn inline-flex items-center justify-center gap-2" onClick={refreshAll}>
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </button>
-              <button className="cta-btn inline-flex items-center gap-2" onClick={runSyncNow} disabled={syncing}>
+              <button className="cta-btn inline-flex items-center justify-center gap-2" onClick={runSyncNow} disabled={syncing}>
                 <Sparkles className="h-4 w-4" />
                 {syncing ? "Refreshing..." : "Refresh Dataset"}
               </button>
@@ -188,7 +188,7 @@ export function DashboardPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <div className="metric-surface border-brand-100/80 p-4 dark:border-brand-900/40">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Top signal</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
+              <p className="mt-2 break-words text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">
                 {leadSkill ? leadSkill.skill : "Waiting for data"}
               </p>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -223,7 +223,7 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
-        <aside className="panel p-5 md:p-6">
+        <aside className="panel p-4 sm:p-5 md:p-6">
           <h3 className="section-title">Reading the dashboard</h3>
           <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
             <li className="flex gap-3">
@@ -276,7 +276,7 @@ export function DashboardPage() {
         </section>
       )}
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard 
           label="Job Listings Analyzed" 
           value={compactNumber(data.total_jobs)} 
@@ -305,12 +305,12 @@ export function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section className="grid gap-3 sm:gap-4 xl:grid-cols-2">
         <SkillsBarChart data={data.top_skills} />
         <HiringTrendChart data={data.hiring_trend} />
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section className="grid gap-3 sm:gap-4 xl:grid-cols-2">
         <SalaryDistributionChart data={data.salary_distribution} />
         <RemoteRatioChart {...data.remote_ratio} />
       </section>

@@ -11,7 +11,7 @@ type Props = {
 
 export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChange }: Props) {
   return (
-    <div className="panel p-5 md:p-6">
+    <div className="panel p-4 sm:p-5 md:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
           <h3 className="section-title">Recent Listings Behind the Analysis</h3>
@@ -25,7 +25,7 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
             Showing {jobs.length} listing{jobs.length === 1 ? "" : "s"}
           </div>
           <input
-            className="input-base sm:w-72"
+            className="input-base w-full sm:w-72"
             placeholder="Filter by role title"
             value={titleFilter}
             onChange={(event) => onFilterChange(event.target.value)}
@@ -50,7 +50,7 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-base font-semibold text-slate-900 dark:text-white">{job.title}</h4>
+                      <h4 className="break-words text-base font-semibold text-slate-900 dark:text-white">{job.title}</h4>
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                           job.is_remote

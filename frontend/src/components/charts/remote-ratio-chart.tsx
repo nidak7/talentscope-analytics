@@ -16,7 +16,7 @@ export function RemoteRatioChart(props: Props) {
 
   if (total === 0) {
     return (
-      <div className="panel p-5">
+      <div className="panel p-4 sm:p-5">
         <h3 className="section-title">Remote vs Onsite</h3>
         <p className="section-copy">
           Remote data is not available yet. Sync new listings to populate the split.
@@ -26,7 +26,7 @@ export function RemoteRatioChart(props: Props) {
   }
 
   return (
-    <div className="panel p-5">
+    <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export function RemoteRatioChart(props: Props) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {data.map((item) => {
           const share = total ? Math.round((item.value / total) * 100) : 0;
           return (

@@ -2,6 +2,10 @@ import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, 
 import { InfoPopover } from "../ui/info-popover";
 import type { SkillCount } from "../../types/api";
 
+function shortenLabel(value: string) {
+  return value.length > 14 ? `${value.slice(0, 12)}...` : value;
+}
+
 export function SkillsBarChart({ data }: { data: SkillCount[] }) {
   const chartData = [...data].slice(0, 6);
 
@@ -17,7 +21,7 @@ export function SkillsBarChart({ data }: { data: SkillCount[] }) {
   }
 
   return (
-    <div className="panel p-5">
+    <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -31,7 +35,7 @@ export function SkillsBarChart({ data }: { data: SkillCount[] }) {
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">Count of analyzed listings</p>
       </div>
-      <div className="mt-4 h-72">
+      <div className="mt-4 h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 18, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.16} horizontal={false} />
@@ -39,11 +43,12 @@ export function SkillsBarChart({ data }: { data: SkillCount[] }) {
             <YAxis
               type="category"
               dataKey="skill"
-              width={118}
-              fontSize={12}
+              width={88}
+              fontSize={11}
               tickLine={false}
               axisLine={false}
               tickMargin={10}
+              tickFormatter={shortenLabel}
             />
             <Tooltip
               cursor={{ fill: "rgba(91, 120, 193, 0.08)" }}

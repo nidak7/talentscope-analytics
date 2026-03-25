@@ -80,14 +80,14 @@ export function SkillGapPage() {
   const roundedHeat = result ? Math.round(result.market_heat_score) : 0;
 
   return (
-    <div className="space-y-5">
-      <section className="panel p-5 md:p-6">
+    <div className="space-y-4 sm:space-y-5">
+      <section className="panel p-4 sm:p-5 md:p-6">
         <div className="max-w-2xl">
           <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-100">
             <Target className="h-3.5 w-3.5" />
             Skill benchmark
           </span>
-          <h2 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">Skill Gap Analysis</h2>
+          <h2 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">Skill Gap Analysis</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
             Enter a target role and the skills you already have. TalentScope compares that list against the repeated
             demand signals in the current dataset and shows what is still missing.
@@ -102,7 +102,7 @@ export function SkillGapPage() {
             onChange={(event) => setRole(event.target.value)}
           />
           <textarea
-            className="input-base min-h-28"
+            className="input-base min-h-28 sm:min-h-32"
             value={knownSkills}
             onChange={(event) => setKnownSkills(event.target.value)}
             placeholder="Your skills separated by commas"
@@ -141,13 +141,13 @@ export function SkillGapPage() {
 
       {result ? (
         <div className="space-y-4">
-          <section className="grid gap-4 xl:grid-cols-[1.2fr_0.9fr]">
-            <div className="panel p-5 md:p-6">
+          <section className="grid gap-3 sm:gap-4 xl:grid-cols-[1.2fr_0.9fr]">
+            <div className="panel p-4 sm:p-5 md:p-6">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Gap summary</p>
-              <h3 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{activeRole}</h3>
+              <h3 className="mt-2 break-words text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">{activeRole}</h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{coverageSummary}</p>
 
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <div className="metric-surface p-4">
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Coverage</p>
@@ -188,7 +188,7 @@ export function SkillGapPage() {
               </div>
             </div>
 
-            <aside className="panel p-5 md:p-6">
+            <aside className="panel p-4 sm:p-5 md:p-6">
               <h3 className="section-title">How to read this</h3>
               <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
                 <li className="flex gap-3">
@@ -207,8 +207,8 @@ export function SkillGapPage() {
             </aside>
           </section>
 
-          <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="panel p-5">
+          <section className="grid gap-3 sm:gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+            <div className="panel p-4 sm:p-5">
               <h4 className="section-title">Skills you already cover</h4>
               <p className="section-copy">Submitted skills compared against current market demand.</p>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -241,7 +241,7 @@ export function SkillGapPage() {
               </div>
             </div>
 
-            <div className="panel p-5">
+            <div className="panel p-4 sm:p-5">
               <div className="flex items-center gap-2">
                 <h4 className="section-title">Missing High-Demand Skills</h4>
                 <InfoPopover
