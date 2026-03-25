@@ -7,7 +7,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { InfoPopover } from "../ui/info-popover";
 import type { TrendPoint } from "../../types/api";
 
 function formatTrendDate(value: string) {
@@ -31,13 +30,7 @@ export function HiringTrendChart({ data }: { data: TrendPoint[] }) {
     <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="section-title">Hiring Trend</h3>
-            <InfoPopover
-              title="Hiring Trend"
-              content="This line shows how many of the analyzed listings were posted on each day. It helps you see whether the current market slice is quiet, steady, or picking up."
-            />
-          </div>
+          <h3 className="section-title">Hiring Trend</h3>
           <p className="section-copy">Daily posting volume across the current dataset.</p>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">Jobs posted per day</p>

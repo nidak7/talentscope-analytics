@@ -1,5 +1,5 @@
 import { ExternalLink, MapPin, Sparkles } from "lucide-react";
-import { salaryRange, shortDate } from "../lib/formatters";
+import { salaryRange, shortDate, toDisplayLabel } from "../lib/formatters";
 import type { LiveJob } from "../types/api";
 
 type Props = {
@@ -14,10 +14,9 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
     <div className="panel p-4 sm:p-5 md:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          <h3 className="section-title">Recent Listings Behind the Analysis</h3>
+          <h3 className="section-title">Recent Listings</h3>
           <p className="section-copy">
-            These are the freshest records currently influencing the dashboard. Use the filter to inspect one role
-            family without leaving the overview.
+            Latest jobs shaping this dashboard.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -50,7 +49,7 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="break-words text-base font-semibold text-slate-900 dark:text-white">{job.title}</h4>
+                      <h4 className="break-words text-base font-semibold text-slate-900 dark:text-white">{toDisplayLabel(job.title)}</h4>
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                           job.is_remote
@@ -62,12 +61,12 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      {job.company || "Unknown company"}
+                      {toDisplayLabel(job.company || "Unknown Company")}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5" />
-                        {job.location || "Location not specified"}
+                        {toDisplayLabel(job.location || "India")}
                       </span>
                       <span>Posted {shortDate(job.posted_date)}</span>
                       <span className="font-medium text-slate-700 dark:text-slate-200">
@@ -101,7 +100,7 @@ export function LiveJobsList({ jobs, loading = false, titleFilter, onFilterChang
                           className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-[11px] font-medium text-brand-800 dark:border-brand-800 dark:bg-brand-900/30 dark:text-brand-100"
                         >
                           <Sparkles className="mr-1 inline h-3 w-3" />
-                          {skill}
+                          {toDisplayLabel(skill)}
                         </span>
                       ))}
                     </div>

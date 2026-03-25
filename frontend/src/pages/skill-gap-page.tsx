@@ -1,8 +1,7 @@
-import { ArrowUpRight, CheckCircle2, Target } from "lucide-react";
+import { CheckCircle2, Target } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { InfoPopover } from "../components/ui/info-popover";
 import { analyzeSkillGap } from "../lib/api-client";
-import { pluralize } from "../lib/formatters";
+import { pluralize, toDisplayLabel } from "../lib/formatters";
 import type { SkillGapResponse } from "../types/api";
 
 const presetSkillSets = [
@@ -88,10 +87,7 @@ export function SkillGapPage() {
             Skill benchmark
           </span>
           <h2 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">Skill Gap Analysis</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Enter a target role and the skills you already have. TalentScope compares that list against the repeated
-            demand signals in the current dataset and shows what is still missing.
-          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Enter your role and skills. We show what the market still expects.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 grid gap-3">
@@ -109,7 +105,7 @@ export function SkillGapPage() {
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Keep it simple: `python, sql, docker` is enough to start.
+              Example: `python, sql, docker`
             </p>
             <button type="submit" disabled={loading} className="cta-btn sm:min-w-[140px]">
               {loading ? "Analyzing..." : "Analyze Gap"}
@@ -129,7 +125,7 @@ export function SkillGapPage() {
                 runAnalysis(preset.role, preset.skills).catch(() => undefined);
               }}
             >
-              {preset.role}
+              {toDisplayLabel(preset.role)}
             </button>
           ))}
         </div>
@@ -141,70 +137,34 @@ export function SkillGapPage() {
 
       {result ? (
         <div className="space-y-4">
-          <section className="grid gap-3 sm:gap-4 xl:grid-cols-[1.2fr_0.9fr]">
+          <section className="grid gap-3 sm:gap-4">
             <div className="panel p-4 sm:p-5 md:p-6">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Gap summary</p>
-              <h3 className="mt-2 break-words text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">{activeRole}</h3>
+              <h3 className="mt-2 break-words text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">{toDisplayLabel(activeRole)}</h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{coverageSummary}</p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <div className="metric-surface p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Coverage</p>
-                    <InfoPopover
-                      title="Coverage"
-                      content="Coverage shows how many of the strongest role-related skills in the current dataset are already present in your skill list."
-                    />
-                  </div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Coverage</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
                     {result.matched_skills.length}/{prioritySkillCount || 0}
                   </p>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    demand score: {Math.round(result.demand_score)}%
+                    Demand score: {Math.round(result.demand_score)}%
                   </p>
                 </div>
                 <div className="metric-surface p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Role activity</p>
-                    <InfoPopover
-                      title="Role activity"
-                      content="This score estimates how active the selected role looks in the current dataset. It rises when more relevant skills appear across the analyzed listings."
-                    />
-                  </div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Role activity</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{roundedHeat}/100</p>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">based on current role demand</p>
                 </div>
                 <div className="metric-surface p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Missing skills</p>
-                    <InfoPopover
-                      title="Missing skills"
-                      content="These are the strongest market skills that were not found in the skill list you entered."
-                    />
-                  </div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Missing skills</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{result.missing_skills.length}</p>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">still worth learning for this role</p>
                 </div>
               </div>
             </div>
-
-            <aside className="panel p-4 sm:p-5 md:p-6">
-              <h3 className="section-title">How to read this</h3>
-              <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-                <li className="flex gap-3">
-                  <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-                  <span>The demand score tracks how much of the market's repeated demand you already cover.</span>
-                </li>
-                <li className="flex gap-3">
-                  <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-                  <span>Missing skills are ranked by how often they appear, not by subjective difficulty.</span>
-                </li>
-                <li className="flex gap-3">
-                  <ArrowUpRight className="mt-0.5 h-4 w-4 text-brand-600" />
-                  <span>The result uses live market data, so it changes as the dataset refreshes.</span>
-                </li>
-              </ul>
-            </aside>
           </section>
 
           <section className="grid gap-3 sm:gap-4 xl:grid-cols-[0.95fr_1.05fr]">
@@ -217,7 +177,7 @@ export function SkillGapPage() {
                     key={skill}
                     className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200"
                   >
-                    {skill}
+                    {toDisplayLabel(skill)}
                   </span>
                 ))}
               </div>
@@ -230,7 +190,7 @@ export function SkillGapPage() {
                       className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-100"
                     >
                       <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />
-                      {skill}
+                      {toDisplayLabel(skill)}
                     </span>
                   ))
                 ) : (
@@ -242,13 +202,7 @@ export function SkillGapPage() {
             </div>
 
             <div className="panel p-4 sm:p-5">
-              <div className="flex items-center gap-2">
-                <h4 className="section-title">Missing High-Demand Skills</h4>
-                <InfoPopover
-                  title="Missing High-Demand Skills"
-                  content="Each skill below appeared in the current market slice for this role, but it was not present in the skill list you entered."
-                />
-              </div>
+              <h4 className="section-title">Missing High-Demand Skills</h4>
               <p className="section-copy">These are the strongest missing signals for the selected role.</p>
               {result.missing_skills.length ? (
                 <ul className="mt-4 grid gap-2 md:grid-cols-2">
@@ -258,7 +212,7 @@ export function SkillGapPage() {
                       className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <span className="font-medium">{item.skill}</span>
+                        <span className="font-medium">{toDisplayLabel(item.skill)}</span>
                         <span className="rounded-full bg-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                           {item.demand_count}
                         </span>

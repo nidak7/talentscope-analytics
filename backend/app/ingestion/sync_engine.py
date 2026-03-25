@@ -19,6 +19,66 @@ from app.schemas.sync import SyncResponse
 
 logger = logging.getLogger(__name__)
 
+INDIA_LOCATION_TERMS = {
+    "india",
+    "bangalore",
+    "bengaluru",
+    "hyderabad",
+    "pune",
+    "mumbai",
+    "chennai",
+    "noida",
+    "gurugram",
+    "gurgaon",
+    "kolkata",
+    "ahmedabad",
+    "delhi",
+    "ncr",
+}
+
+TECH_ROLE_TERMS = {
+    "engineer",
+    "developer",
+    "software",
+    "data",
+    "analytics",
+    "analyst",
+    "cloud",
+    "devops",
+    "backend",
+    "front end",
+    "frontend",
+    "full stack",
+    "platform",
+    "product",
+    "ai",
+    "ml",
+    "security",
+    "qa",
+    "testing",
+    "sre",
+    "site reliability",
+    "python",
+    "java",
+    "react",
+    "node",
+    "kubernetes",
+}
+
+NON_TECH_BLOCK_TERMS = {
+    "nurse",
+    "therapist",
+    "physician",
+    "clinical",
+    "medical",
+    "healthcare",
+    "dentist",
+    "pharmacist",
+    "surgeon",
+    "radiology",
+    "occupational therapist",
+}
+
 
 class SyncEngine:
     def __init__(self, db: AsyncIOMotorDatabase, extractor: SkillExtractor, cache: AsyncTTLCache) -> None:
@@ -62,8 +122,7 @@ class SyncEngine:
 
         if country_specific_sync and not self.settings.has_reliable_job_api_credentials:
             errors.append(
-                f"{country_code.upper()}-only sync requires working Adzuna credentials. "
-                "The current deployment is using public fallback feeds, which cannot provide a reliable country-specific dataset."
+                f"Adzuna credentials missing. Running curated public fallback for {country_code.upper()}."
             )
 
         if self.settings.has_reliable_job_api_credentials:
@@ -71,21 +130,27 @@ class SyncEngine:
             jobs_processed += adzuna_count
             errors.extend(adzuna_errors)
         elif not country_specific_sync:
-            errors.append("Adzuna credentials missing. Falling back to public job feed.")
+            errors.append("Primary source keys missing. Using curated public feeds.")
 
-        # Ensure the product has data even when premium credentials are absent or temporarily failing.
-        if jobs_processed == 0 and not country_specific_sync:
-            public_count, public_errors = await self._sync_from_public_feed(max_jobs=max_jobs)
-            jobs_processed += public_count
-            errors.extend(public_errors)
+        # Keep the product usable when premium credentials are absent or temporarily failing.
+        should_run_public_fallback = jobs_processed == 0 or not self.settings.has_reliable_job_api_credentials
+        if should_run_public_fallback:
+            remaining = max_jobs - jobs_processed if max_jobs is not None else None
+            if remaining is None or remaining > 0:
+                public_count, public_errors = await self._sync_from_public_feed(
+                    max_jobs=remaining,
+                    country_code=country_code,
+                )
+                jobs_processed += public_count
+                errors.extend(public_errors)
 
         if max_jobs and jobs_processed < max_jobs and self.settings.has_reliable_job_api_credentials:
             errors.append(
                 f"Requested up to {max_jobs} jobs for {country_code.upper()}, but the source returned {jobs_processed}."
             )
-        elif max_jobs and jobs_processed < max_jobs and not self.settings.has_reliable_job_api_credentials and not country_specific_sync:
+        elif max_jobs and jobs_processed < max_jobs and not self.settings.has_reliable_job_api_credentials:
             errors.append(
-                f"Requested up to {max_jobs} jobs, but the public fallback feed returned {jobs_processed}."
+                f"Requested up to {max_jobs} jobs for {country_code.upper()}, but public feeds returned {jobs_processed}."
             )
 
         status = "success" if not errors else ("partial" if jobs_processed > 0 else "failed")
@@ -140,7 +205,9 @@ class SyncEngine:
                     continue
 
                 for raw_job in records:
-                    normalized = self._normalize_adzuna_job(raw_job, keyword)
+                    normalized = self._normalize_adzuna_job(raw_job, keyword, country_code)
+                    if not self._is_curated_job(normalized, country_code):
+                        continue
                     await self.db["jobs"].update_one(
                         {"source": normalized["source"], "external_id": normalized["external_id"]},
                         {"$set": normalized},
@@ -152,7 +219,11 @@ class SyncEngine:
 
         return jobs_processed, errors
 
-    async def _sync_from_public_feed(self, max_jobs: int | None = None) -> tuple[int, list[str]]:
+    async def _sync_from_public_feed(
+        self,
+        max_jobs: int | None = None,
+        country_code: str = "in",
+    ) -> tuple[int, list[str]]:
         errors: list[str] = []
         jobs_processed = 0
 
@@ -183,6 +254,9 @@ class SyncEngine:
                     normalized = normalize_job(raw_job)
                     if not normalized:
                         continue
+                    if not self._is_curated_job(normalized, country_code):
+                        continue
+                    normalized["country"] = country_code.upper()
                     await self.db["jobs"].update_one(
                         {"source": normalized["source"], "external_id": normalized["external_id"]},
                         {"$set": normalized},
@@ -197,7 +271,7 @@ class SyncEngine:
 
         return jobs_processed, errors
 
-    def _normalize_adzuna_job(self, raw_job: dict[str, Any], keyword: str) -> dict[str, Any]:
+    def _normalize_adzuna_job(self, raw_job: dict[str, Any], keyword: str, country_code: str) -> dict[str, Any]:
         title = (raw_job.get("title") or "").strip()
         description = (raw_job.get("description") or "").strip()
         location = (raw_job.get("location") or {}).get("display_name")
@@ -219,7 +293,7 @@ class SyncEngine:
             "title": title,
             "company": company,
             "location": location,
-            "country": self.settings.adzuna_country.upper(),
+            "country": country_code.upper(),
             "description": description,
             "url": raw_job.get("redirect_url") or "",
             "salary_min": raw_job.get("salary_min"),
@@ -438,6 +512,40 @@ class SyncEngine:
             if keyword.lower() in text:
                 return keyword
         return None
+
+    def _is_curated_job(self, normalized_job: dict[str, Any], country_code: str) -> bool:
+        title = str(normalized_job.get("title") or "")
+        description = str(normalized_job.get("description") or "")
+        location = str(normalized_job.get("location") or "")
+        skills = " ".join(normalized_job.get("skills") or [])
+        keyword = str(normalized_job.get("search_keyword") or "")
+        text_blob = " ".join([title, description, skills, keyword]).lower()
+        location_blob = f"{location} {description}".lower()
+
+        if not self._looks_like_tech_role(text_blob):
+            return False
+
+        if not self._matches_country(location_blob, country_code):
+            return False
+
+        # Normalize empty location after filters so UI shows a stable region.
+        if not location.strip() and country_code.lower() == "in":
+            normalized_job["location"] = "India"
+
+        return True
+
+    @staticmethod
+    def _looks_like_tech_role(text_blob: str) -> bool:
+        if any(term in text_blob for term in NON_TECH_BLOCK_TERMS):
+            return False
+        return any(term in text_blob for term in TECH_ROLE_TERMS)
+
+    @staticmethod
+    def _matches_country(location_blob: str, country_code: str) -> bool:
+        code = country_code.lower()
+        if code == "in":
+            return any(term in location_blob for term in INDIA_LOCATION_TERMS)
+        return True
 
     @staticmethod
     def _strip_html(raw_html: str) -> str:

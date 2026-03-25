@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { InfoPopover } from "../ui/info-popover";
+import { toDisplayLabel } from "../../lib/formatters";
 import type { SkillCount } from "../../types/api";
 
 function shortenLabel(value: string) {
@@ -7,7 +7,10 @@ function shortenLabel(value: string) {
 }
 
 export function SkillsBarChart({ data }: { data: SkillCount[] }) {
-  const chartData = [...data].slice(0, 6);
+  const chartData = [...data].slice(0, 6).map((item) => ({
+    ...item,
+    skill: toDisplayLabel(item.skill)
+  }));
 
   if (!data.length) {
     return (
@@ -24,13 +27,7 @@ export function SkillsBarChart({ data }: { data: SkillCount[] }) {
     <div className="panel p-4 sm:p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="section-title">Top In-Demand Skills</h3>
-            <InfoPopover
-              title="Top In-Demand Skills"
-              content="Each bar shows how many analyzed job listings asked for that skill. Higher bars mean the skill appeared in more listings across the current dataset."
-            />
-          </div>
+          <h3 className="section-title">Top In-Demand Skills</h3>
           <p className="section-copy">Skills that appeared most often across the analyzed job listings.</p>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">Count of analyzed listings</p>

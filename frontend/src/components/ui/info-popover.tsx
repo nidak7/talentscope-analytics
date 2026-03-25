@@ -39,19 +39,19 @@ export function InfoPopover({ content, title = "About this section", align = "ri
         aria-label={title}
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+        className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-300/90 bg-white/80 text-slate-500 transition hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:text-brand-300"
       >
         <CircleHelp className="h-3.5 w-3.5" />
       </button>
 
       {open ? (
         <div
-          className={`absolute top-full z-20 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-sm shadow-[0_20px_40px_-24px_rgba(15,23,42,0.45)] dark:border-slate-700 dark:bg-slate-900 ${
+          className={`absolute top-full z-[70] mt-2 w-64 rounded-xl border border-slate-200 bg-white/95 p-3 text-xs shadow-[0_20px_40px_-24px_rgba(15,23,42,0.45)] backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 ${
             align === "left" ? "left-0" : "right-0"
           }`}
         >
           <p className="font-semibold text-slate-900 dark:text-white">{title}</p>
-          <p className="mt-2 leading-6 text-slate-600 dark:text-slate-300">{content}</p>
+          <p className="mt-1.5 leading-5 text-slate-600 dark:text-slate-300">{content}</p>
         </div>
       ) : null}
     </div>
