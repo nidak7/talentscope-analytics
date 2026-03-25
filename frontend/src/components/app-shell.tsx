@@ -75,7 +75,7 @@ export function AppShell() {
         ) : null}
 
         <aside
-          className={`panel fixed inset-y-2.5 left-2.5 z-40 w-[min(20rem,calc(100vw-1.25rem))] flex-col overflow-y-auto p-4 transition-transform duration-200 lg:sticky lg:top-5 lg:flex lg:h-[calc(100vh-2.5rem)] lg:w-72 ${
+          className={`panel fixed inset-y-2.5 left-2.5 z-40 w-[min(20rem,calc(100vw-1.25rem))] flex-col overflow-y-auto p-4 transition-transform duration-200 lg:sticky lg:top-5 lg:flex lg:h-[calc(100vh-2.5rem)] lg:w-72 content-fade-in ${
             mobileMenuOpen ? "flex translate-x-0" : "hidden -translate-x-[110%] lg:translate-x-0"
           }`}
         >
@@ -99,8 +99,8 @@ export function AppShell() {
                 Admin
               </div>
             ) : null}
-            <h1 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white">Analytics Console</h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <h1 className="title-strong mt-3 text-xl font-semibold text-slate-900 dark:text-white">Analytics Console</h1>
+            <p className="copy-soft mt-1 text-sm text-slate-500 dark:text-slate-400">
               Understand demand, salary signals, and skill trends quickly.
             </p>
           </div>
@@ -114,8 +114,8 @@ export function AppShell() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
                     isActive
-                      ? "bg-brand-600 text-white shadow"
-                      : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80"
+                      ? "bg-brand-600 text-white shadow-[0_14px_28px_-18px_rgba(70,97,175,0.95)]"
+                      : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80"
                   }`
                 }
               >
@@ -145,7 +145,7 @@ export function AppShell() {
         </aside>
 
         <main className="min-w-0 flex-1 space-y-3 pb-20 sm:space-y-4 lg:pb-0">
-          <header className="panel flex flex-col gap-3 px-3.5 py-3.5 sm:px-4 md:px-5 lg:flex-row lg:items-center lg:justify-between">
+          <header className="panel content-fade-in flex flex-col gap-3 px-3.5 py-3.5 sm:px-4 md:px-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 flex items-start gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
@@ -160,15 +160,15 @@ export function AppShell() {
                     {currentMeta.title}
                   </p>
                 </div>
-                <h2 className="mt-1 text-base font-semibold text-slate-900 dark:text-white sm:text-lg">
+                <h2 className="title-strong mt-1 text-base font-semibold text-slate-900 dark:text-white sm:text-lg">
                   TalentScope Analytics
                 </h2>
-                <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
+                <p className="copy-soft mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
                   {currentMeta.summary}
                 </p>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-800/70 lg:min-w-[220px] lg:justify-end lg:bg-transparent lg:p-0">
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-[#102240] lg:min-w-[220px] lg:justify-end lg:bg-transparent lg:p-0">
               <div className="min-w-0 text-left lg:text-right">
                 <p className="max-w-[9rem] truncate text-sm font-medium text-slate-700 dark:text-slate-300 lg:max-w-none">
                   {isAdmin ? "Admin" : user?.full_name || user?.email}

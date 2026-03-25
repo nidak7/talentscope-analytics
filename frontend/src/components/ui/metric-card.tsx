@@ -19,11 +19,11 @@ export function MetricCard({ label, value, hint, emphasis = "slate", info }: Met
   return (
     <div className={`metric-surface p-4 sm:p-5 ${ringClass}`}>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400 sm:text-xs">{label}</p>
+        <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-300 sm:text-xs">{label}</p>
         {info ? <InfoPopover content={info} title={label} /> : null}
       </div>
       <p className="mt-3 break-words text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">{value}</p>
-      {hint ? <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-300 sm:text-xs">{hint}</p> : null}
     </div>
   );
 }

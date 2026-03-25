@@ -65,6 +65,10 @@ export function SkillGapPage() {
       return null;
     }
 
+    if (!result.missing_skills.length && !result.matched_skills.length) {
+      return "No strong market signal is available for this role yet. Try a broader role title.";
+    }
+
     if (!result.missing_skills.length) {
       return "You already cover the strongest skills in this market slice.";
     }
@@ -79,7 +83,7 @@ export function SkillGapPage() {
   const roundedHeat = result ? Math.round(result.market_heat_score) : 0;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="space-y-4 sm:space-y-5 content-fade-in">
       <section className="panel p-4 sm:p-5 md:p-6">
         <div className="max-w-2xl">
           <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-100">
@@ -98,10 +102,10 @@ export function SkillGapPage() {
             onChange={(event) => setRole(event.target.value)}
           />
           <textarea
-            className="input-base min-h-28 sm:min-h-32"
+            className="input-base min-h-24 sm:min-h-28"
             value={knownSkills}
             onChange={(event) => setKnownSkills(event.target.value)}
-            placeholder="Your skills separated by commas"
+            placeholder="Enter your skills separated by commas"
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -143,20 +147,20 @@ export function SkillGapPage() {
               <h3 className="mt-2 break-words text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">{toDisplayLabel(activeRole)}</h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{coverageSummary}</p>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="metric-surface p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Coverage</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
-                    {result.matched_skills.length}/{prioritySkillCount || 0}
+                    {prioritySkillCount ? `${result.matched_skills.length}/${prioritySkillCount}` : "N/A"}
                   </p>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Demand score: {Math.round(result.demand_score)}%
+                    Demand score: {prioritySkillCount ? `${Math.round(result.demand_score)}%` : "No signal"}
                   </p>
                 </div>
                 <div className="metric-surface p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Role activity</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{roundedHeat}/100</p>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">based on current role demand</p>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">based on current role demand</p>
                 </div>
                 <div className="metric-surface p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Missing skills</p>
@@ -167,8 +171,8 @@ export function SkillGapPage() {
             </div>
           </section>
 
-          <section className="grid gap-3 sm:gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="panel p-4 sm:p-5">
+          <section className="grid gap-3 sm:gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="panel min-w-0 p-4 sm:p-5">
               <h4 className="section-title">Skills you already cover</h4>
               <p className="section-copy">Submitted skills compared against current market demand.</p>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -182,34 +186,37 @@ export function SkillGapPage() {
                 ))}
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                {result.matched_skills.length ? (
-                  result.matched_skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-100"
-                    >
-                      <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />
-                      {toDisplayLabel(skill)}
-                    </span>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    None of the strongest market signals match yet.
-                  </p>
-                )}
+              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-[#102240]">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-300">Matched Skills</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {result.matched_skills.length ? (
+                    result.matched_skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800 dark:border-emerald-800/70 dark:bg-emerald-900/25 dark:text-emerald-100"
+                      >
+                        <CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />
+                        {toDisplayLabel(skill)}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500 dark:text-slate-300">
+                      No strong matches yet. Focus on the missing skills list.
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="panel p-4 sm:p-5">
+            <div className="panel min-w-0 p-4 sm:p-5">
               <h4 className="section-title">Missing High-Demand Skills</h4>
               <p className="section-copy">These are the strongest missing signals for the selected role.</p>
               {result.missing_skills.length ? (
-                <ul className="mt-4 grid gap-2 md:grid-cols-2">
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
                   {result.missing_skills.map((item) => (
                     <li
                       key={item.skill}
-                      className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                      className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-[#132746] dark:text-slate-100"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <span className="font-medium">{toDisplayLabel(item.skill)}</span>
