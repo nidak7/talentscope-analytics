@@ -2,7 +2,7 @@
 
 **What skills do employers ask for in different jobs, what skills do I already have, and what am I missing for the role I want?**
 
-TalentScope turns raw job postings into career insights. I collected postings for **ten roles in India** from the Adzuna API (24 November 2026), measured which skills each role asks for, and built a skill-gap check that compares a candidate's skills with what a target role asks for. The work is in Python and SQL, with a Power BI dashboard on top.
+TalentScope turns raw job postings into something a job seeker can act on. I collected postings for **ten roles in India** from the Adzuna API (24 November 2026), measured which skills each role asks for, and built a skill-gap check that compares a candidate's skills with what a target role asks for. The work is in Python and SQL, with a Power BI dashboard on top.
 
 ## The three questions
 
