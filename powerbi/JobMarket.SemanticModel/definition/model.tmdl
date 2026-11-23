@@ -1,0 +1,8 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+
+ref table jobs
+ref table skill_demand
+ref expression DataFolder

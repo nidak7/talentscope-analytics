@@ -37,4 +37,9 @@ backend/.coverage
 render-login.err
 tools/
 frontend/.vercel/
-Data
+
+# Raw Adzuna downloads, local secrets, Power BI cache
+data/raw/
+*.env
+.env
+**/.pbi/

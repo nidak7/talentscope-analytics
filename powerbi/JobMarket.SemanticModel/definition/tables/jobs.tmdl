@@ -1,0 +1,91 @@
+table jobs
+
+	measure 'Recent postings' = COUNTROWS(jobs)
+		formatString: #,0
+
+	measure 'Postings with salary' = COUNT(jobs[salary_lpa])
+		formatString: #,0
+
+	measure 'Median salary (lakh)' = MEDIAN(jobs[salary_lpa])
+		formatString: 0.00
+
+	measure 'Remote or WFH postings' = CALCULATE([Recent postings], jobs[work_mode] = "Remote / WFH")
+		formatString: #,0
+
+	measure 'Senior share' = DIVIDE(CALCULATE([Recent postings], jobs[seniority] = "Senior / lead / manager"), [Recent postings])
+		formatString: 0%
+
+	measure 'Median experience (years)' = MEDIAN(jobs[experience_years_min])
+		formatString: 0
+
+	column job_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: job_id
+
+	column title
+		dataType: string
+		summarizeBy: none
+		sourceColumn: title
+
+	column company
+		dataType: string
+		summarizeBy: none
+		sourceColumn: company
+
+	column city
+		dataType: string
+		summarizeBy: none
+		sourceColumn: city
+
+	column city_group
+		dataType: string
+		summarizeBy: none
+		sourceColumn: city_group
+
+	column posted_month
+		dataType: string
+		summarizeBy: none
+		sourceColumn: posted_month
+
+	column posted_date
+		dataType: string
+		summarizeBy: none
+		sourceColumn: posted_date
+
+	column role_group
+		dataType: string
+		summarizeBy: none
+		sourceColumn: role_group
+
+	column seniority
+		dataType: string
+		summarizeBy: none
+		sourceColumn: seniority
+
+	column work_mode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: work_mode
+
+	column experience_years_min
+		dataType: double
+		summarizeBy: none
+		sourceColumn: experience_years_min
+
+	column salary_lpa
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: salary_lpa
+
+	partition jobs = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "\india_data_analyst_jobs.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+					Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					Selected = Table.SelectColumns(Promoted, {"job_id", "title", "company", "city", "city_group", "posted_month", "posted_date", "role_group", "seniority", "work_mode", "experience_years_min", "salary_lpa"}),
+					Typed = Table.TransformColumnTypes(Selected, {{"job_id", type text}, {"title", type text}, {"company", type text}, {"city", type text}, {"city_group", type text}, {"posted_month", type text}, {"posted_date", type text}, {"role_group", type text}, {"seniority", type text}, {"work_mode", type text}, {"experience_years_min", type number}, {"salary_lpa", type number}}, "en-US")
+				in
+					Typed

@@ -1,0 +1,21 @@
+type,skill,postings,share_pct,fetched_on
+total,(all data analyst postings),938,100.0,2026-11-24
+skill,SQL,626,66.7,2026-11-24
+skill,Excel,419,44.7,2026-11-24
+skill,Power BI,339,36.1,2026-11-24
+skill,Tableau,274,29.2,2026-11-24
+skill,Python,427,45.5,2026-11-24
+skill,SAS,54,5.8,2026-11-24
+skill,Looker,60,6.4,2026-11-24
+skill,Qlik,10,1.1,2026-11-24
+skill,Snowflake,114,12.2,2026-11-24
+skill,AWS,118,12.6,2026-11-24
+skill,Azure,147,15.7,2026-11-24
+skill,machine learning,153,16.3,2026-11-24
+skill,statistics,323,34.4,2026-11-24
+skill,ETL,183,19.5,2026-11-24
+skill,VBA,35,3.7,2026-11-24
+skill,Google Analytics,103,11.0,2026-11-24
+work arrangement,remote,126,13.4,2026-11-24
+work arrangement,work from home,45,4.8,2026-11-24
+work arrangement,hybrid,127,13.5,2026-11-24

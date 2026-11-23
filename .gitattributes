@@ -1,0 +1,3 @@
+backend/** linguist-vendored
+frontend/** linguist-vendored
+*.ipynb linguist-detectable
