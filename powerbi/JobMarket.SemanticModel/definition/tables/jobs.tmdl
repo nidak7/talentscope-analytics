@@ -3,12 +3,6 @@ table jobs
 	measure 'Recent postings' = COUNTROWS(jobs)
 		formatString: #,0
 
-	measure 'Postings with salary' = COUNT(jobs[salary_lpa])
-		formatString: #,0
-
-	measure 'Median salary (lakh)' = MEDIAN(jobs[salary_lpa])
-		formatString: 0.00
-
 	measure 'Remote or WFH postings' = CALCULATE([Recent postings], jobs[work_mode] = "Remote / WFH")
 		formatString: #,0
 
@@ -17,6 +11,9 @@ table jobs
 
 	measure 'Median experience (years)' = MEDIAN(jobs[experience_years_min])
 		formatString: 0
+
+	measure 'Median salary (lakh)' = MEDIAN(jobs[salary_lpa])
+		formatString: 0.00
 
 	column job_id
 		dataType: string
@@ -75,7 +72,7 @@ table jobs
 
 	column salary_lpa
 		dataType: double
-		formatString: 0.0
+		formatString: 0.00
 		summarizeBy: none
 		sourceColumn: salary_lpa
 

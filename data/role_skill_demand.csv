@@ -1,0 +1,131 @@
+role,kind,term,postings,share_pct,avg_advertised_salary_inr,fetched_on
+accountant,total,(all postings),2498,100.0,1383323.0,2026-11-24
+accountant,skill,Excel,1342,53.7,,2026-11-24
+accountant,skill,Tally,588,23.5,,2026-11-24
+accountant,skill,SAP,493,19.7,,2026-11-24
+accountant,skill,GST,746,29.9,,2026-11-24
+accountant,skill,QuickBooks,228,9.1,,2026-11-24
+accountant,skill,Power BI,90,3.6,,2026-11-24
+accountant,skill,SQL,47,1.9,,2026-11-24
+accountant,skill,taxation,384,15.4,,2026-11-24
+accountant,work arrangement,remote,203,8.1,,2026-11-24
+accountant,work arrangement,work from home,113,4.5,,2026-11-24
+accountant,work arrangement,hybrid,203,8.1,,2026-11-24
+business analyst,total,(all postings),1660,100.0,1028007.0,2026-11-24
+business analyst,skill,SQL,571,34.4,,2026-11-24
+business analyst,skill,Excel,587,35.4,,2026-11-24
+business analyst,skill,Power BI,280,16.9,,2026-11-24
+business analyst,skill,Agile,643,38.7,,2026-11-24
+business analyst,skill,JIRA,346,20.8,,2026-11-24
+business analyst,skill,Tableau,229,13.8,,2026-11-24
+business analyst,skill,Python,206,12.4,,2026-11-24
+business analyst,skill,requirements,1490,89.8,,2026-11-24
+business analyst,work arrangement,remote,128,7.7,,2026-11-24
+business analyst,work arrangement,work from home,48,2.9,,2026-11-24
+business analyst,work arrangement,hybrid,179,10.8,,2026-11-24
+data analyst,total,(all postings),938,100.0,1010119.0,2026-11-24
+data analyst,skill,SQL,626,66.7,,2026-11-24
+data analyst,skill,Excel,419,44.7,,2026-11-24
+data analyst,skill,Power BI,339,36.1,,2026-11-24
+data analyst,skill,Tableau,274,29.2,,2026-11-24
+data analyst,skill,Python,427,45.5,,2026-11-24
+data analyst,skill,statistics,323,34.4,,2026-11-24
+data analyst,skill,ETL,183,19.5,,2026-11-24
+data analyst,skill,machine learning,153,16.3,,2026-11-24
+data analyst,skill,Azure,147,15.7,,2026-11-24
+data analyst,skill,AWS,118,12.6,,2026-11-24
+data analyst,skill,Snowflake,114,12.2,,2026-11-24
+data analyst,skill,Google Analytics,103,11.0,,2026-11-24
+data analyst,skill,Looker,60,6.4,,2026-11-24
+data analyst,skill,SAS,54,5.8,,2026-11-24
+data analyst,skill,VBA,35,3.7,,2026-11-24
+data analyst,skill,Qlik,10,1.1,,2026-11-24
+data analyst,work arrangement,remote,126,13.4,,2026-11-24
+data analyst,work arrangement,work from home,45,4.8,,2026-11-24
+data analyst,work arrangement,hybrid,127,13.5,,2026-11-24
+data scientist,total,(all postings),1642,100.0,1695598.0,2026-11-24
+data scientist,skill,Python,1360,82.8,,2026-11-24
+data scientist,skill,machine learning,1279,77.9,,2026-11-24
+data scientist,skill,SQL,914,55.7,,2026-11-24
+data scientist,skill,statistics,1076,65.5,,2026-11-24
+data scientist,skill,deep learning,713,43.4,,2026-11-24
+data scientist,skill,NLP,452,27.5,,2026-11-24
+data scientist,skill,TensorFlow,424,25.8,,2026-11-24
+data scientist,skill,PyTorch,402,24.5,,2026-11-24
+data scientist,skill,AWS,537,32.7,,2026-11-24
+data scientist,work arrangement,remote,160,9.7,,2026-11-24
+data scientist,work arrangement,work from home,79,4.8,,2026-11-24
+data scientist,work arrangement,hybrid,246,15.0,,2026-11-24
+digital marketing,total,(all postings),1026,100.0,750292.0,2026-11-24
+digital marketing,skill,SEO,715,69.7,,2026-11-24
+digital marketing,skill,Google Analytics,511,49.8,,2026-11-24
+digital marketing,skill,Google Ads,433,42.2,,2026-11-24
+digital marketing,skill,social media,761,74.2,,2026-11-24
+digital marketing,skill,Excel,125,12.2,,2026-11-24
+digital marketing,skill,CRM,138,13.5,,2026-11-24
+digital marketing,skill,content,727,70.9,,2026-11-24
+digital marketing,skill,email marketing,501,48.8,,2026-11-24
+digital marketing,work arrangement,remote,90,8.8,,2026-11-24
+digital marketing,work arrangement,work from home,44,4.3,,2026-11-24
+digital marketing,work arrangement,hybrid,30,2.9,,2026-11-24
+hr executive,total,(all postings),680,100.0,1367895.0,2026-11-24
+hr executive,skill,recruitment,500,73.5,,2026-11-24
+hr executive,skill,payroll,308,45.3,,2026-11-24
+hr executive,skill,HRIS,62,9.1,,2026-11-24
+hr executive,skill,Excel,212,31.2,,2026-11-24
+hr executive,skill,onboarding,357,52.5,,2026-11-24
+hr executive,skill,ATS,28,4.1,,2026-11-24
+hr executive,skill,communication,447,65.7,,2026-11-24
+hr executive,skill,labour law,192,28.2,,2026-11-24
+hr executive,work arrangement,remote,25,3.7,,2026-11-24
+hr executive,work arrangement,work from home,12,1.8,,2026-11-24
+hr executive,work arrangement,hybrid,8,1.2,,2026-11-24
+product manager,total,(all postings),2570,100.0,1637897.0,2026-11-24
+product manager,skill,SQL,335,13.0,,2026-11-24
+product manager,skill,Agile,709,27.6,,2026-11-24
+product manager,skill,JIRA,241,9.4,,2026-11-24
+product manager,skill,roadmap,1509,58.7,,2026-11-24
+product manager,skill,analytics,1384,53.9,,2026-11-24
+product manager,skill,Figma,78,3.0,,2026-11-24
+product manager,skill,Excel,541,21.1,,2026-11-24
+product manager,skill,stakeholder,1519,59.1,,2026-11-24
+product manager,work arrangement,remote,235,9.1,,2026-11-24
+product manager,work arrangement,work from home,139,5.4,,2026-11-24
+product manager,work arrangement,hybrid,225,8.8,,2026-11-24
+project manager,total,(all postings),2215,100.0,1056938.0,2026-11-24
+project manager,skill,Agile,669,30.2,,2026-11-24
+project manager,skill,Scrum,369,16.7,,2026-11-24
+project manager,skill,JIRA,355,16.0,,2026-11-24
+project manager,skill,PMP,570,25.7,,2026-11-24
+project manager,skill,Excel,593,26.8,,2026-11-24
+project manager,skill,MS Project,438,19.8,,2026-11-24
+project manager,skill,stakeholder,1498,67.6,,2026-11-24
+project manager,skill,budget,1096,49.5,,2026-11-24
+project manager,work arrangement,remote,179,8.1,,2026-11-24
+project manager,work arrangement,work from home,105,4.7,,2026-11-24
+project manager,work arrangement,hybrid,250,11.3,,2026-11-24
+sales executive,total,(all postings),3582,100.0,858783.0,2026-11-24
+sales executive,skill,CRM,966,27.0,,2026-11-24
+sales executive,skill,Salesforce,138,3.9,,2026-11-24
+sales executive,skill,Excel,451,12.6,,2026-11-24
+sales executive,skill,lead generation,1388,38.7,,2026-11-24
+sales executive,skill,negotiation,1535,42.9,,2026-11-24
+sales executive,skill,communication,2376,66.3,,2026-11-24
+sales executive,skill,B2B,588,16.4,,2026-11-24
+sales executive,skill,cold calling,536,15.0,,2026-11-24
+sales executive,work arrangement,remote,166,4.6,,2026-11-24
+sales executive,work arrangement,work from home,97,2.7,,2026-11-24
+sales executive,work arrangement,hybrid,46,1.3,,2026-11-24
+software developer,total,(all postings),3072,100.0,1240818.0,2026-11-24
+software developer,skill,Java,1064,34.6,,2026-11-24
+software developer,skill,Python,919,29.9,,2026-11-24
+software developer,skill,JavaScript,694,22.6,,2026-11-24
+software developer,skill,SQL,701,22.8,,2026-11-24
+software developer,skill,React,510,16.6,,2026-11-24
+software developer,skill,Git,516,16.8,,2026-11-24
+software developer,skill,AWS,860,28.0,,2026-11-24
+software developer,skill,Docker,416,13.5,,2026-11-24
+software developer,skill,Spring Boot,198,6.4,,2026-11-24
+software developer,work arrangement,remote,265,8.6,,2026-11-24
+software developer,work arrangement,work from home,169,5.5,,2026-11-24
+software developer,work arrangement,hybrid,319,10.4,,2026-11-24

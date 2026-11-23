@@ -2,35 +2,72 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "v004",
   "position": {
-    "x": 965,
-    "y": 20,
+    "x": 445,
+    "y": 150,
     "z": 4,
-    "height": 110,
-    "width": 295,
+    "height": 550,
+    "width": 410,
     "tabOrder": 4
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "clusteredBarChart",
     "query": {
       "queryState": {
-        "Values": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "role_demand"
+                    }
+                  },
+                  "Property": "role"
+                }
+              },
+              "queryRef": "role_demand.role",
+              "nativeQueryRef": "role",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
           "projections": [
             {
               "field": {
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "skill_demand"
+                      "Entity": "role_demand"
                     }
                   },
-                  "Property": "Tableau share"
+                  "Property": "Remote mention share"
                 }
               },
-              "queryRef": "skill_demand.Tableau share",
-              "nativeQueryRef": "Tableau share"
+              "queryRef": "role_demand.Remote mention share",
+              "nativeQueryRef": "Remote mention share"
             }
           ]
         }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "role_demand"
+                  }
+                },
+                "Property": "Remote mention share"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
       }
     },
     "visualContainerObjects": {
@@ -47,7 +84,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Mention Tableau'"
+                  "Value": "'Postings that mention remote work'"
                 }
               }
             },
@@ -56,7 +93,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2C3640'"
+                      "Value": "'#22303C'"
                     }
                   }
                 }
@@ -104,7 +141,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E3E7EB'"
+                      "Value": "'#DCE6E8'"
                     }
                   }
                 }
@@ -123,29 +160,15 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "dataPoint": [
         {
           "properties": {
-            "labelPrecision": {
-              "expr": {
-                "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "28D"
-                }
-              }
-            },
-            "color": {
+            "fill": {
               "solid": {
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#3F566E'"
+                      "Value": "'#E9A23B'"
                     }
                   }
                 }
@@ -154,13 +177,33 @@
           }
         }
       ],
-      "categoryLabels": [
+      "categoryAxis": [
+        {
+          "properties": {
+            "axisType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Categorical'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "labels": [
         {
           "properties": {
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

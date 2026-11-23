@@ -5,29 +5,30 @@
     "x": 20,
     "y": 20,
     "z": 6,
-    "height": 110,
-    "width": 295,
+    "height": 680,
+    "width": 250,
     "tabOrder": 6
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "slicer",
     "query": {
       "queryState": {
         "Values": {
           "projections": [
             {
               "field": {
-                "Measure": {
+                "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "jobs"
+                      "Entity": "role_demand"
                     }
                   },
-                  "Property": "Recent postings"
+                  "Property": "role"
                 }
               },
-              "queryRef": "jobs.Recent postings",
-              "nativeQueryRef": "Recent postings"
+              "queryRef": "role_demand.role",
+              "nativeQueryRef": "role",
+              "active": true
             }
           ]
         }
@@ -47,7 +48,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Recent postings analysed'"
+                  "Value": "'Choose a role'"
                 }
               }
             },
@@ -56,7 +57,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2C3640'"
+                      "Value": "'#22303C'"
                     }
                   }
                 }
@@ -104,7 +105,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E3E7EB'"
+                      "Value": "'#DCE6E8'"
                     }
                   }
                 }
@@ -123,45 +124,81 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "data": [
         {
           "properties": {
-            "labelPrecision": {
+            "mode": {
               "expr": {
                 "Literal": {
-                  "Value": "0D"
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "28D"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#3F566E'"
-                    }
-                  }
+                  "Value": "'Basic'"
                 }
               }
             }
           }
         }
       ],
-      "categoryLabels": [
+      "selection": [
         {
           "properties": {
-            "show": {
+            "singleSelect": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "selectAllCheckboxEnabled": {
               "expr": {
                 "Literal": {
                   "Value": "false"
                 }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "filter": {
+              "filter": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "r",
+                    "Entity": "role_demand",
+                    "Type": 0
+                  }
+                ],
+                "Where": [
+                  {
+                    "Condition": {
+                      "In": {
+                        "Expressions": [
+                          {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Source": "r"
+                                }
+                              },
+                              "Property": "role"
+                            }
+                          }
+                        ],
+                        "Values": [
+                          [
+                            {
+                              "Literal": {
+                                "Value": "'data scientist'"
+                              }
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                ]
               }
             }
           }

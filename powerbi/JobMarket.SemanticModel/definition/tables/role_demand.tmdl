@@ -1,0 +1,66 @@
+table role_demand
+
+	measure 'Roles analysed' = DISTINCTCOUNT(role_demand[role])
+		formatString: 0
+
+	measure 'Role postings' = CALCULATE(SUM(role_demand[postings]), role_demand[kind] = "total")
+		formatString: #,0
+
+	measure 'Demand share' = DIVIDE(SUM(role_demand[share_pct]), 100)
+		formatString: 0%
+
+	measure 'Remote mention share' = CALCULATE([Demand share], role_demand[term] = "remote")
+		formatString: 0%
+
+	measure 'Work from home mention share' = CALCULATE([Demand share], role_demand[term] = "work from home")
+		formatString: 0%
+
+	measure 'Avg advertised salary (lakh)' = DIVIDE(CALCULATE(SUM(role_demand[avg_advertised_salary_inr]), role_demand[kind] = "total"), 100000)
+		formatString: 0.0
+
+	measure 'Top skill share' = CALCULATE(MAX(role_demand[share_pct]), role_demand[kind] = "skill") / 100
+		formatString: 0%
+
+	measure 'Skill coverage (top 8)' = VAR Top8 = TOPN(8, FILTER(role_demand, role_demand[kind] = "skill"), role_demand[postings]) RETURN DIVIDE(SUMX(FILTER(Top8, RELATED(candidate_skills[have]) = "Yes"), role_demand[share_pct]), SUMX(Top8, role_demand[share_pct]))
+		formatString: 0%
+
+	column role
+		dataType: string
+		summarizeBy: none
+		sourceColumn: role
+
+	column kind
+		dataType: string
+		summarizeBy: none
+		sourceColumn: kind
+
+	column term
+		dataType: string
+		summarizeBy: none
+		sourceColumn: term
+
+	column postings
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: postings
+
+	column share_pct
+		dataType: double
+		summarizeBy: none
+		sourceColumn: share_pct
+
+	column avg_advertised_salary_inr
+		dataType: double
+		summarizeBy: none
+		sourceColumn: avg_advertised_salary_inr
+
+	partition role_demand = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "\role_skill_demand.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+					Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					Selected = Table.SelectColumns(Promoted, {"role", "kind", "term", "postings", "share_pct", "avg_advertised_salary_inr"}),
+					Typed = Table.TransformColumnTypes(Selected, {{"role", type text}, {"kind", type text}, {"term", type text}, {"postings", Int64.Type}, {"share_pct", type number}, {"avg_advertised_salary_inr", type number}}, "en-US")
+				in
+					Typed

@@ -4,5 +4,6 @@ model Model
 	discourageImplicitMeasures
 
 ref table jobs
-ref table skill_demand
+ref table role_demand
+ref table candidate_skills
 ref expression DataFolder

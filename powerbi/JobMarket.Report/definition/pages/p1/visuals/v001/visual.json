@@ -6,7 +6,7 @@
     "y": 20,
     "z": 1,
     "height": 110,
-    "width": 295,
+    "width": 610,
     "tabOrder": 1
   },
   "visual": {
@@ -20,14 +20,14 @@
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "skill_demand"
+                      "Entity": "role_demand"
                     }
                   },
-                  "Property": "Data analyst postings analysed"
+                  "Property": "Roles analysed"
                 }
               },
-              "queryRef": "skill_demand.Data analyst postings analysed",
-              "nativeQueryRef": "Data analyst postings analysed"
+              "queryRef": "role_demand.Roles analysed",
+              "nativeQueryRef": "Roles analysed"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'India postings titled 'data analyst''"
+                  "Value": "'Roles analysed'"
                 }
               }
             },
@@ -56,7 +56,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2C3640'"
+                      "Value": "'#22303C'"
                     }
                   }
                 }
@@ -104,7 +104,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#E3E7EB'"
+                      "Value": "'#DCE6E8'"
                     }
                   }
                 }
@@ -133,6 +133,13 @@
                 }
               }
             },
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
             "fontSize": {
               "expr": {
                 "Literal": {
@@ -145,7 +152,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#3F566E'"
+                      "Value": "'#1F7A8C'"
                     }
                   }
                 }

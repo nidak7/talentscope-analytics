@@ -1,0 +1,28 @@
+table candidate_skills
+
+	measure 'Skills the example candidate has' = COUNTROWS(FILTER(candidate_skills, candidate_skills[have] = "Yes"))
+		formatString: 0
+
+	measure 'Skills tracked' = COUNTROWS(candidate_skills)
+		formatString: 0
+
+	column skill
+		dataType: string
+		summarizeBy: none
+		sourceColumn: skill
+
+	column have
+		dataType: string
+		summarizeBy: none
+		sourceColumn: have
+
+	partition candidate_skills = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(File.Contents(DataFolder & "\candidate_skills.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+					Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					Selected = Table.SelectColumns(Promoted, {"skill", "have"}),
+					Typed = Table.TransformColumnTypes(Selected, {{"skill", type text}, {"have", type text}}, "en-US")
+				in
+					Typed

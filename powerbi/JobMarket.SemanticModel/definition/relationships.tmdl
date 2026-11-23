@@ -1,0 +1,3 @@
+relationship role_demand_to_candidate
+	fromColumn: role_demand.term
+	toColumn: candidate_skills.skill

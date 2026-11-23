@@ -1,10 +1,12 @@
 # Power BI dashboard
 
-A three-page dashboard built from the cleaned CSV files in `../data/`:
+A five-page dashboard built from the cleaned CSV files in `../data/`:
 
-1. **Skills in demand**: how many India "data analyst" postings mention each skill (938 postings)
-2. **Market snapshot**: roles, seniority, cities and months for 212 recent postings
-3. **Remote work and pay**: remote, work-from-home and hybrid mentions, salary and the remote postings I found
+1. **Roles at a glance:** postings, remote mentions and rough advertised salary for the ten roles
+2. **Skills by role:** pick a role and see the share of its postings that mention each skill
+3. **Skill gap across roles:** how much of each role's top 8 skills the example candidate already covers
+4. **Skill gap for one role:** pick a target role and see its skills, their demand and which ones the example candidate has
+5. **Data analyst deep dive:** 212 recent data analyst postings (roles, cities, seniority, remote postings)
 
 ## Open the project
 
@@ -12,9 +14,12 @@ A three-page dashboard built from the cleaned CSV files in `../data/`:
 2. In `JobMarket.SemanticModel/definition/expressions.tmdl`, set `DataFolder` to the full path of the `data` folder on your machine.
 3. Click **Refresh**.
 
+To check a different candidate, edit `data/candidate_skills.csv` (set `have` to Yes or No) and refresh.
+
 ## How it is built
 
-- **Two tables:** `jobs` (one row per recent posting) and `skill_demand` (the full-text skill counts). They are not linked, because each page uses one of them.
-- **Measures (DAX):** recent postings, postings with a salary, median salary, remote postings, senior share, median experience, skill share, postings mentioning a skill, and the SQL, Power BI, Tableau, remote, work-from-home and hybrid shares.
-- **Filters:** the skills chart uses only `type = skill`, and the remote table uses only `work_mode = Remote / WFH`.
-- Colours match the other projects in this profile (soft blue, sage and coral).
+- **Three tables:** `role_demand` (the skill counts for the ten roles), `candidate_skills` (the example candidate) and `jobs` (the 212 data analyst postings). `role_demand` and `candidate_skills` are linked on the skill name.
+- **Skill coverage (DAX):** takes a role's top 8 skills with `TOPN`, looks up whether the candidate has each one through the relationship, and divides the demand share of the skills they have by the total. It matches the Python script and the SQL query.
+- **Other measures:** role postings, demand share, remote and work-from-home mention share, average advertised salary, top skill share, and (for the data analyst page) recent postings, senior share, median experience and median salary.
+- **Filters:** the skill charts use only rows where `kind = skill`, and the remote table uses only `work_mode = Remote / WFH`.
+- **Colours:** teal, amber and plum on a light background.
