@@ -15,7 +15,7 @@ table role_demand
 	measure 'Work from home mention share' = CALCULATE([Demand share], role_demand[term] = "work from home")
 		formatString: 0%
 
-	measure 'Avg advertised salary (lakh)' = DIVIDE(CALCULATE(SUM(role_demand[avg_advertised_salary_inr]), role_demand[kind] = "total"), 100000)
+	measure 'Avg advertised salary (lakh)' = DIVIDE(CALCULATE(AVERAGE(role_demand[avg_advertised_salary_inr]), role_demand[kind] = "total"), 100000)
 		formatString: 0.0
 
 	measure 'Top skill share' = CALCULATE(MAX(role_demand[share_pct]), role_demand[kind] = "skill") / 100
