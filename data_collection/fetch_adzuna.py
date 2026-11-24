@@ -27,7 +27,7 @@ RAW = Path(__file__).resolve().parents[1] / "data" / "raw"
 RESULTS_PER_PAGE = 50
 
 # (country code, search phrase, pages). This study covers India only.
-# Adzuna has no Saudi Arabia or Gulf listings, so I only used India.
+# India only.
 PLAN = [
     ("in", "data analyst", 5),
     ("in", "business intelligence analyst", 3),

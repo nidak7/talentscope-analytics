@@ -80,7 +80,7 @@ More in [`notebooks/data_analyst_deep_dive.ipynb`](notebooks/data_analyst_deep_d
 
 ## Things to keep in mind
 
-This is one job site on one day, so LinkedIn or Naukri may look different. A skill being mentioned doesn't mean it's required. I only count postings with the role in the title, so "HR generalist" isn't counted under "hr executive". The skill lists are my own choice. Salary figures include Adzuna's estimates, so I don't rely on them. The gap score ignores experience, degrees and soft skills, and the example candidate is made up. Adzuna has no data for Saudi Arabia or the UAE (I tested both), so this is India only.
+This is one job site on one day, so LinkedIn or Naukri may look different. A skill being mentioned doesn't mean it's required. I only count postings with the role in the title, so "HR generalist" isn't counted under "hr executive". The skill lists are my own choice. Salary figures include Adzuna's estimates, so I don't rely on them. The gap score ignores experience, degrees and soft skills, and the example candidate is made up. It only covers India.
 
 ## What's in the repo
 
