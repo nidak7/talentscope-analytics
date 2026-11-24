@@ -26,8 +26,7 @@ import requests
 RAW = Path(__file__).resolve().parents[1] / "data" / "raw"
 RESULTS_PER_PAGE = 50
 
-# (country code, search phrase, pages). This study covers India only.
-# India only.
+# (country code, search phrase, pages). India only.
 PLAN = [
     ("in", "data analyst", 5),
     ("in", "business intelligence analyst", 3),

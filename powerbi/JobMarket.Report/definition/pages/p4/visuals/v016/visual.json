@@ -186,6 +186,13 @@
                   "Value": "'Categorical'"
                 }
               }
+            },
+            "maxMarginFactor": {
+              "expr": {
+                "Literal": {
+                  "Value": "40L"
+                }
+              }
             }
           }
         }

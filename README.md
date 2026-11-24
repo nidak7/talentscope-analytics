@@ -4,6 +4,8 @@
 
 What skills do companies look for in a role, and what skills does a candidate have? Once I had both, I could see what the candidate is missing for the role they want. I collected postings for ten roles in India from the Adzuna API (24 November 2026), counted the skills in the full job text, and built a skill-gap check on top. It uses Python and SQL, with a Power BI dashboard.
 
+It's aimed at people like me who are trying to decide what to learn for the role they want.
+
 ## What I found
 
 | Role | India postings | Top skills mentioned |
@@ -19,9 +21,9 @@ What skills do companies look for in a role, and what skills does a candidate ha
 | Data analyst | 938 | SQL 67%, Python 46%, Excel 45% |
 | HR executive | 680 | recruitment 74%, communication 66%, onboarding 52% |
 
-Postings are those with the role in the job title. The percentages are the share of those postings whose full text mentions the skill. Adzuna does the matching on the full text, so the counts don't depend on the 500-character preview the API returns.
+Postings are those with the role in the job title. The percentages are the share of those postings whose full text mentions the skill. The API only gives 500 characters per ad, so I asked Adzuna to count matches on the full text instead.
 
-Each role has its own skills, so a gap only makes sense for a target role. Excel is the most shared skill. It's on the list for 8 of the 10 roles and is highest for accountants (54%). SQL isn't only for analysts. It's in 56% of data scientist postings, 34% of business analyst and 23% of software developer postings. Only 7 of the skills I tracked appear across three or more roles: Excel, SQL, Python, Power BI, Agile, JIRA and AWS.
+Each role asks for quite different things, so I always compare against one target role. Excel is the most shared skill. It's on the list for 8 of the 10 roles and is highest for accountants (54%). SQL also shows up outside analyst roles: it's in 56% of data scientist postings, 34% of business analyst and 23% of software developer postings. Only 7 of the skills I tracked appear across three or more roles: Excel, SQL, Python, Power BI, Agile, JIRA and AWS.
 
 "Remote" is mentioned in 4% to 13% of postings (data analyst is highest at 13%, the other nine are under 10%). "Hybrid" is in 1% to 15%. These are keyword mentions, not a count of fully remote jobs.
 
@@ -64,7 +66,7 @@ Five pages: roles overview, skills by role, skill gap across roles, skill gap fo
 
 ## How I built it
 
-It's a simple ETL flow. Extract: `fetch_role_demand.py` asks the API, for each role and skill, how many postings match, and `fetch_adzuna.py` downloads the data analyst postings. Transform: `build_dataset.py` removes repeated adverts, keeps analyst titles and recent dates, and works out role group, seniority, remote mentions, experience and salary. Load: the cleaned tables are saved as CSV files in `data/`. After that, the notebooks and SQL queries answer the questions, and `analysis/skill_gap.py` runs the gap check from the command line.
+I used the API to get the counts for each role and skill (`fetch_role_demand.py`) and to download the data analyst postings (`fetch_adzuna.py`). Then `build_dataset.py` cleans the postings: it removes repeated adverts, keeps analyst titles from June 2026 on, and works out seniority, remote mentions, experience and salary. Everything is saved as CSV in `data/`, and the notebooks, SQL and Power BI all read from there. `analysis/skill_gap.py` runs the gap check from the command line, and `tests/` has a few checks for it.
 
 ## Data analyst postings
 
@@ -78,9 +80,14 @@ Adzuna only returns the first 500 characters of each posting. For data analyst I
 
 More in [`notebooks/data_analyst_deep_dive.ipynb`](notebooks/data_analyst_deep_dive.ipynb).
 
-## Things to keep in mind
+## Limits
 
-This is one job site on one day, so LinkedIn or Naukri may look different. A skill being mentioned doesn't mean it's required. I only count postings with the role in the title, so "HR generalist" isn't counted under "hr executive". The skill lists are my own choice. Salary figures include Adzuna's estimates, so I don't rely on them. The gap score ignores experience, degrees and soft skills, and the example candidate is made up. It only covers India.
+- It's one job site on one day, so LinkedIn or Naukri may look different.
+- A skill being mentioned doesn't mean it's required.
+- I only count postings with the role in the title, so "HR generalist" isn't counted under "hr executive".
+- The skill lists are my own choice, and salary figures include Adzuna's estimates.
+- The gap score ignores experience, degrees and soft skills, and the example candidate is made up.
+- It only covers India.
 
 ## What's in the repo
 
@@ -89,11 +96,11 @@ This is one job site on one day, so LinkedIn or Naukri may look different. A ski
 - [`sql/job_market_queries.sql`](sql/job_market_queries.sql): 19 SQL queries (joins, window functions, CTEs, a skill-gap query) with the results I got
 - [`analysis/skill_gap.py`](analysis/skill_gap.py): the command-line gap tool
 - [`powerbi/`](powerbi/): the Power BI project
-- [`data/`](data/): the cleaned datasets and the example candidate
+- [`data/`](data/): the cleaned datasets and the example candidate, with a short [column guide](data/README.md)
 - [`data_collection/`](data_collection/): the scripts that collect and clean the data
 - [`docs/web-app.md`](docs/web-app.md): an earlier web app version (FastAPI, React, MongoDB)
 
-I don't publish the job descriptions themselves, only the counts and the columns I worked out from them.
+I don't publish the job descriptions themselves, only the counts and the columns I worked out from them. So the raw downloads aren't in the repo, and `build_dataset.py` needs a fresh download with your own key. The CSVs in `data/` are enough to rerun the notebooks, SQL and dashboard.
 
 To refresh the data:
 
