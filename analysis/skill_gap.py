@@ -1,13 +1,13 @@
 """Skill gap check for a target job role (India, Adzuna data fetched 2026-11-24).
 
-For a role, take its top N skills by demand (share of postings that mention
+For a role, take its top N skills by demand (the share of postings that mention
 the skill), mark which ones the candidate has, and work out a coverage score:
 
     coverage = sum of demand share of the skills you have
                / sum of demand share of all top N skills
 
-Missing skills are ranked by demand. A mention in a posting is not a
-requirement, so treat coverage as a rough guide.
+Missing skills are ranked by demand. A mention in a posting isn't a
+requirement, so coverage is only a rough guide.
 
 Usage (run from the project folder):
     python analysis/skill_gap.py --role "data scientist" --skills "SQL,Python,Excel"
@@ -33,7 +33,7 @@ def load_candidate(path=DATA / "candidate_skills.csv"):
 
 
 def skill_gap(role, have_skills, top_n=8, demand=None):
-    """Return a dict with the gap table, coverage % and the missing skills."""
+    """Return a dict with the gap table, the coverage % and the missing skills."""
     demand = load_demand() if demand is None else demand
     roles = sorted(demand["role"].unique())
     if role.lower() not in roles:

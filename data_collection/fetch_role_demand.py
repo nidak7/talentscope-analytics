@@ -1,12 +1,12 @@
 """
-Measure demand and skills for ten job roles in India using the Adzuna API.
+Count skill demand for ten job roles in India using the Adzuna API.
 
-For each role the script asks Adzuna how many India postings have the role in the TITLE,
+For each role the script asks Adzuna how many India postings have the role in the title,
 and how many of those also mention each skill (or "remote" / "work from home") anywhere in
 the full job text. Adzuna's average advertised salary for the role comes back with the
-first request. Each request asks for a single result, so only the counts are downloaded.
+first request. Each request asks for one result only, so just the counts are downloaded.
 
-Run from the repository root (never commit your keys):
+Run from the repository root (don't commit your keys):
     export ADZUNA_APP_ID=...  ADZUNA_APP_KEY=...
     python data_collection/fetch_role_demand.py
 
@@ -22,7 +22,7 @@ import requests
 OUT = Path(__file__).resolve().parents[1] / "data" / "role_skill_demand.csv"
 BASE = "https://api.adzuna.com/v1/api/jobs/in/search/1"
 
-# role (searched in the job title) -> skills that are meaningful for that role
+# role (searched in the job title) -> skills I chose to check for that role
 ROLES = {
     "data analyst": ["SQL", "Excel", "Power BI", "Tableau", "Python", "statistics", "ETL", "machine learning",
                      "Azure", "AWS", "Snowflake", "Google Analytics", "Looker", "SAS", "VBA", "Qlik"],
@@ -54,7 +54,7 @@ def main():
     if not app_id or not app_key:
         raise SystemExit("Set ADZUNA_APP_ID and ADZUNA_APP_KEY first.")
     today = time.strftime("%Y-%m-%d")
-    # Keep what was already collected and only ask for terms that are missing
+    # Keep what is already collected and only ask for terms that are missing
     old = pd.read_csv(OUT) if OUT.exists() else pd.DataFrame(
         columns=["role", "kind", "term", "postings", "share_pct", "avg_advertised_salary_inr", "fetched_on"])
     have = set(zip(old["role"], old["term"]))

@@ -6,7 +6,7 @@
 --   role_demand   <- data/role_skill_demand.csv         full-text skill counts for 10 roles (kind = total | skill | work arrangement)
 --   candidate_skills <- data/candidate_skills.csv       example candidate (have = Yes / No)
 --
--- The results I got are written in the comments.
+-- The results I got are in the comments.
 
 -- 1. How big is the sample and what dates does it cover?
 -- Expect: 212 postings, 2026-06-13 to 2026-11-24, 170 distinct employers
@@ -52,7 +52,7 @@ HAVING COUNT(*) >= 3
 ORDER BY postings DESC, company;
 
 -- 6. Skills found in the recent sample, with the share of all postings
---    (only the first 500 characters of each advert are available, so this is a lower bound)
+--    (I only have the first 500 characters of each advert, so these are lower than the real numbers)
 SELECT js.skill,
        COUNT(DISTINCT js.job_id) AS postings,
        ROUND(100.0 * COUNT(DISTINCT js.job_id) / (SELECT COUNT(*) FROM jobs), 1) AS share_pct
@@ -103,7 +103,7 @@ SELECT MAX(CASE WHEN skill = 'Power BI' THEN postings END) AS power_bi,
 FROM tools;
 
 -- 11. Median stated salary by seniority, in lakh rupees a year
---     (SQLite has no MEDIAN, so rank the rows and take the middle one)
+--     (SQLite has no MEDIAN, so I rank the rows and take the middle one)
 WITH ranked AS (
     SELECT seniority, salary_lpa,
            ROW_NUMBER() OVER (PARTITION BY seniority ORDER BY salary_lpa) AS rn,
@@ -148,7 +148,7 @@ FROM (SELECT role, term, share_pct,
 WHERE rn <= 3
 ORDER BY role, rn;
 
--- 15. Skills that appear in 5 or more roles (GROUP BY / HAVING)
+-- 15. Skills in 5 or more roles (GROUP BY / HAVING)
 -- Expect: Excel in 8 roles (average share 29.7%), SQL in 6 roles (32.4%). No other skill is in 5 or more roles.
 SELECT term AS skill, COUNT(DISTINCT role) AS roles, ROUND(AVG(share_pct), 1) AS avg_share_pct
 FROM role_demand
@@ -167,7 +167,7 @@ ORDER BY share_pct DESC;
 
 -- 17. Remote and work-from-home mention share by role
 -- Expect: data analyst 13.4 / 4.8, data scientist 9.7 / 4.8, product manager 9.1 / 5.4 ... hr executive 3.7 / 1.8
---         (remote % / work from home %). Keyword mentions that overlap, not confirmed remote jobs
+--         (remote % / work from home %). These are keyword mentions that overlap, not confirmed remote jobs
 SELECT role,
        MAX(CASE WHEN term = 'remote'         THEN share_pct END) AS remote_pct,
        MAX(CASE WHEN term = 'work from home' THEN share_pct END) AS wfh_pct
@@ -177,7 +177,7 @@ GROUP BY role
 ORDER BY remote_pct DESC;
 
 -- 18. Skill gap for the example candidate, in pure SQL
---     Take each role's top 8 skills (ROW_NUMBER), LEFT JOIN the candidate's skills,
+--     I take each role's top 8 skills (ROW_NUMBER) and LEFT JOIN the candidate's skills,
 --     coverage = SUM(share of skills the candidate has) / SUM(share of all 8 skills).
 --     Same numbers as notebooks/job_market_by_role.ipynb and analysis/skill_gap.py.
 -- Expect: data analyst 77.8, data scientist 49.6, business analyst 37.8, accountant 37.8,

@@ -3,16 +3,16 @@ Download data analyst job postings from the Adzuna API and save them as raw JSON
 
 Setup
     1. Register for a free key at https://developer.adzuna.com
-    2. Set two environment variables (never commit them):
+    2. Set two environment variables (don't commit them):
            ADZUNA_APP_ID=...   ADZUNA_APP_KEY=...
 
 Run from the repository root:
     python data_collection/fetch_adzuna.py            # run the full plan
     python data_collection/fetch_adzuna.py --max-calls 1   # try a single call
 
-Every response is cached in data/raw/, so re-running never repeats a call that
-already succeeded. The free test plan only allows 25 calls in total, so the plan
-below is kept small on purpose.
+Every response is saved in data/raw/, so running it again doesn't repeat a call that
+already worked. The free test plan only allows 25 calls in total, so the plan
+below is small on purpose.
 """
 import argparse
 import json
@@ -27,7 +27,7 @@ RAW = Path(__file__).resolve().parents[1] / "data" / "raw"
 RESULTS_PER_PAGE = 50
 
 # (country code, search phrase, pages). This study covers India only.
-# Adzuna has no Saudi Arabia or Gulf listings.
+# Adzuna has no Saudi Arabia or Gulf listings, so I only used India.
 PLAN = [
     ("in", "data analyst", 5),
     ("in", "business intelligence analyst", 3),

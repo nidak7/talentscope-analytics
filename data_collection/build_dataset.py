@@ -1,5 +1,5 @@
 """
-Turn the raw Adzuna downloads (data/raw/*.json) into two clean tables:
+Clean the raw Adzuna downloads (data/raw/*.json) into two tables:
 
     data/india_data_analyst_jobs.csv    one row per job posting
     data/india_job_skills.csv           one row per (posting, skill), for Power BI
@@ -8,11 +8,11 @@ Run from the repository root:
     python data_collection/build_dataset.py
 
 What the script does
-    1. Joins all raw files and removes repeated postings (same id, or same title + company + city).
-    2. Keeps only analyst-type job titles posted in the study window (since 1 June 2026).
+    1. Joins all the raw files and removes repeated postings (same id, or same title + company + city).
+    2. Keeps only analyst job titles posted since 1 June 2026.
     3. Adds role group, seniority, remote flag, experience, salary (in lakhs per year) and
-       one yes/no column for each skill mentioned in the job text.
-The job text itself is not saved, only the columns derived from it.
+       a yes/no column for each skill found in the job text.
+The job text itself is not saved, only the columns worked out from it.
 """
 import glob
 import json
@@ -25,7 +25,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 STUDY_START = "2026-06-01"
 
-# skill name -> regular expression (matched on lower-case title + description snippet)
+# skill name -> regular expression (matched on the lower-case title + description snippet)
 SKILLS = {
     "SQL": r"\bsql\b|mysql|postgres|t-sql|pl/sql|ssms",
     "Excel": r"\bexcel\b|spreadsheet",
@@ -138,8 +138,8 @@ def main():
     df["experience_years_min"] = df["text"].map(experience_years)
     df["posted_month"] = df["posted_date"].str[:7]
 
-    # Salary: Adzuna gives yearly rupees. Keep a salary only when it is stated by the employer,
-    # has both ends, and the range is believable (top no more than 3x the bottom).
+    # Salary: Adzuna gives yearly rupees. I keep a salary only if the employer stated it,
+    # it has both ends, and the range looks believable (top no more than 3x the bottom).
     low, high = df["salary_min"], df["salary_max"]
     usable = (~df["salary_is_predicted"]) & low.notna() & high.notna() & (low > 0) & (high <= 3 * low)
     df["salary_lpa"] = ((low + high) / 2 / 100000).where(usable).round(2)
