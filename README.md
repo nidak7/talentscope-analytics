@@ -31,16 +31,16 @@ Each role asks for quite different things, so I always compare against one targe
 
 ## Skill gap check
 
-The example candidate knows SQL, Excel, Power BI, Python and statistics. Coverage is the share of a role's top eight skills (weighted by how often each is mentioned) that the candidate already has.
+These are my own skills: SQL, Excel, Power BI, Python, statistics, ETL, machine learning, Java, Spring Boot, Git, React, JavaScript and Agile. Coverage is the share of a role's top eight skills (weighted by how often each is mentioned) that I already have.
 
 | Role | Coverage | Biggest gaps |
 |---|---|---|
-| Data analyst | 78% | Tableau, ETL, machine learning |
-| Data scientist | 50% | machine learning, deep learning, AWS |
-| Business analyst | 38% | requirements, Agile, JIRA |
+| Data analyst | 90% | Tableau |
+| Software developer | 78% | AWS, Docker |
+| Data scientist | 69% | deep learning, AWS, NLP |
+| Business analyst | 53% | requirements, JIRA, Tableau |
 | Accountant | 38% | GST, Tally, SAP |
-| Software developer | 29% | Java, AWS, JavaScript |
-| Product manager | 14% | stakeholder, roadmap, analytics |
+| Product manager | 25% | stakeholder, roadmap, analytics |
 
 ![Skill gap by role](images/skill_gap_by_role.png)
 
@@ -86,7 +86,7 @@ More in [`notebooks/data_analyst_deep_dive.ipynb`](notebooks/data_analyst_deep_d
 - A skill being mentioned doesn't mean it's required.
 - I only count postings with the role in the title, so "HR generalist" isn't counted under "hr executive".
 - The skill lists are my own choice, and salary figures include Adzuna's estimates.
-- The gap score ignores experience, degrees and soft skills, and the example candidate is made up.
+- The gap score ignores experience, degrees and soft skills.
 - It only covers India.
 
 ## What's in the repo
@@ -96,7 +96,7 @@ More in [`notebooks/data_analyst_deep_dive.ipynb`](notebooks/data_analyst_deep_d
 - [`sql/job_market_queries.sql`](sql/job_market_queries.sql): 19 SQL queries (joins, window functions, CTEs, a skill-gap query) with the results I got
 - [`analysis/skill_gap.py`](analysis/skill_gap.py): the command-line gap tool
 - [`powerbi/`](powerbi/): the Power BI project
-- [`data/`](data/): the cleaned datasets and the example candidate, with a short [column guide](data/README.md)
+- [`data/`](data/): the cleaned datasets and my own skills list, with a short [column guide](data/README.md)
 - [`data_collection/`](data_collection/): the scripts that collect and clean the data
 - [`docs/web-app.md`](docs/web-app.md): an earlier web app version (FastAPI, React, MongoDB)
 

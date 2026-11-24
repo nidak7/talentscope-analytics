@@ -93,7 +93,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Skills for this role: demand and whether the example candidate has them'"
+                  "Value": "'Skills for this role: demand and whether I have them'"
                 }
               }
             },

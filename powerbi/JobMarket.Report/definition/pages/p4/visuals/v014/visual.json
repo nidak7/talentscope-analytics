@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top 8 skills covered by the example candidate'"
+                  "Value": "'How much of this role's top 8 skills I have'"
                 }
               }
             },

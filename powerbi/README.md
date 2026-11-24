@@ -4,8 +4,8 @@ The dashboard has five pages and uses the cleaned CSV files in `../data/`.
 
 1. Roles at a glance: postings, remote mentions and rough advertised salary for the ten roles.
 2. Skills by role: pick a role and see the share of its postings that mention each skill.
-3. Skill gap across roles: how much of each role's top 8 skills the example candidate already covers.
-4. Skill gap for one role: pick a target role and see its skills, their demand and which ones the example candidate has.
+3. Skill gap across roles: how much of each role's top 8 skills I already have.
+4. Skill gap for one role: pick a target role and see its skills, their demand and which ones I have.
 5. Data analyst postings: 212 recent data analyst postings (roles, cities, seniority, remote postings).
 
 ## Open the project
@@ -18,7 +18,7 @@ To try a different candidate, edit `data/candidate_skills.csv` (set `have` to Ye
 
 ## How it's built
 
-The model has three tables. `role_demand` holds the skill counts for the ten roles, `candidate_skills` is the example candidate and `jobs` is the 212 data analyst postings. `role_demand` and `candidate_skills` are linked on the skill name.
+The model has three tables. `role_demand` holds the skill counts for the ten roles, `candidate_skills` is my own skills list and `jobs` is the 212 data analyst postings. `role_demand` and `candidate_skills` are linked on the skill name.
 
 Skill coverage is a DAX measure. It takes a role's top 8 skills with `TOPN`, checks through the relationship whether the candidate has each one, and divides the demand share of the skills they have by the total. It matches the Python script and the SQL query.
 

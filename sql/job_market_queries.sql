@@ -4,7 +4,7 @@
 --   jobs          <- data/india_data_analyst_jobs.csv   one row per recent posting (212 rows)
 --   job_skills    <- data/india_job_skills.csv          one row per posting and skill found in its text
 --   role_demand   <- data/role_skill_demand.csv         full-text skill counts for 10 roles (kind = total | skill | work arrangement)
---   candidate_skills <- data/candidate_skills.csv       example candidate (have = Yes / No)
+--   candidate_skills <- data/candidate_skills.csv       my own skills (have = Yes / No)
 --
 -- The results I got are in the comments.
 
@@ -176,12 +176,12 @@ WHERE kind = 'work arrangement'
 GROUP BY role
 ORDER BY remote_pct DESC;
 
--- 18. Skill gap for the example candidate, in pure SQL
+-- 18. Skill gap for my own skills, in pure SQL
 --     I take each role's top 8 skills (ROW_NUMBER) and LEFT JOIN the candidate's skills,
 --     coverage = SUM(share of skills the candidate has) / SUM(share of all 8 skills).
 --     Same numbers as notebooks/job_market_by_role.ipynb and analysis/skill_gap.py.
--- Expect: data analyst 77.8, data scientist 49.6, business analyst 37.8, accountant 37.8,
---         software developer 28.5, product manager 13.9, project manager 10.6, hr executive 10.1,
+-- Expect: data analyst 90.0, software developer 77.5, data scientist 68.5, business analyst 52.6,
+--         accountant 37.8, product manager 25.1, project manager 22.6, hr executive 10.1,
 --         sales executive 5.7, digital marketing 3.2
 WITH top_skills AS (
     SELECT role, term, share_pct
@@ -201,7 +201,7 @@ GROUP BY t.role
 ORDER BY coverage_pct DESC;
 
 -- 19. Missing skills among a role's top 8, most in demand first (change the role name to try another)
--- Expect: machine learning 77.9, deep learning 43.4, AWS 32.7, NLP 27.5, TensorFlow 25.8 (coverage for this role: 49.6%)
+-- Expect: deep learning 43.4, AWS 32.7, NLP 27.5, TensorFlow 25.8 (coverage for this role: 68.5%)
 SELECT t.term AS missing_skill, t.share_pct
 FROM (SELECT role, term, share_pct,
              ROW_NUMBER() OVER (PARTITION BY role ORDER BY share_pct DESC, term) AS rn

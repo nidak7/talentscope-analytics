@@ -23,11 +23,11 @@
                       "Entity": "candidate_skills"
                     }
                   },
-                  "Property": "Skills the example candidate has"
+                  "Property": "Skills I have"
                 }
               },
-              "queryRef": "candidate_skills.Skills the example candidate has",
-              "nativeQueryRef": "Skills the example candidate has"
+              "queryRef": "candidate_skills.Skills I have",
+              "nativeQueryRef": "Skills I have"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Skills the example candidate has'"
+                  "Value": "'Skills I have'"
                 }
               }
             },

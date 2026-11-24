@@ -84,7 +84,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Share of each role's top 8 skills the example candidate already covers'"
+                  "Value": "'Share of each role's top 8 skills I already have'"
                 }
               }
             },

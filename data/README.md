@@ -18,7 +18,7 @@ One row per role and term. This is what the main analysis and the skill gap use.
 
 ## candidate_skills.csv
 
-The example candidate: one row per skill with `have` set to Yes or No. Change it to try your own skills.
+My own skills: one row per skill with `have` set to Yes or No. Change it to try your own skills.
 
 ## india_data_analyst_jobs.csv
 

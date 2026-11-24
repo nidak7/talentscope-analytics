@@ -1,5 +1,5 @@
 skill,have
-Agile,No
+Agile,Yes
 analytics,No
 ATS,No
 AWS,No
@@ -13,21 +13,21 @@ CRM,No
 deep learning,No
 Docker,No
 email marketing,No
-ETL,No
+ETL,Yes
 Excel,Yes
 Figma,No
-Git,No
+Git,Yes
 Google Ads,No
 Google Analytics,No
 GST,No
 HRIS,No
-Java,No
-JavaScript,No
+Java,Yes
+JavaScript,Yes
 JIRA,No
 labour law,No
 lead generation,No
 Looker,No
-machine learning,No
+machine learning,Yes
 MS Project,No
 negotiation,No
 NLP,No
@@ -39,7 +39,7 @@ Python,Yes
 PyTorch,No
 Qlik,No
 QuickBooks,No
-React,No
+React,Yes
 recruitment,No
 requirements,No
 roadmap,No
@@ -50,7 +50,7 @@ Scrum,No
 SEO,No
 Snowflake,No
 social media,No
-Spring Boot,No
+Spring Boot,Yes
 SQL,Yes
 stakeholder,No
 statistics,Yes

@@ -1,6 +1,6 @@
 table candidate_skills
 
-	measure 'Skills the example candidate has' = COUNTROWS(FILTER(candidate_skills, candidate_skills[have] = "Yes"))
+	measure 'Skills I have' = COUNTROWS(FILTER(candidate_skills, candidate_skills[have] = "Yes"))
 		formatString: 0
 
 	measure 'Skills tracked' = COUNTROWS(candidate_skills)
